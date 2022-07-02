@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"github.com/iancoleman/strcase"
 
 	"crud-generator-gui/internal/models"
 	"crud-generator-gui/pkg/printer"
@@ -31,6 +32,8 @@ type (
 	fieldOptions struct {
 		nameEntry     *widget.Entry
 		enumEntry     *widget.Entry
+		defaultEntry  *widget.Entry
+		checkEntry    *widget.Entry
 		typeSelect    *widget.Select
 		nullableCheck *widget.Check
 	}
@@ -39,24 +42,36 @@ type (
 // newFieldOption inits new field option widgets.
 func newFieldOption(app *App, selectedField *selectedField) fieldOptions {
 	nameEntry := widget.NewEntry()
-	nameEntry.PlaceHolder = "Status"
-	nameEntry.OnChanged = func(s string) {
-		app.entity.Fields[selectedField.ID].Name = s
+	nameEntry.PlaceHolder = "CallbackStatus"
+	nameEntry.OnChanged = func(name string) {
+		app.entity.Fields[selectedField.ID].Name = name
 	}
 
 	enumEntry := widget.NewEntry()
 	enumEntry.PlaceHolder = "active, pending, done"
 	enumEntry.Disable() // disable until enum type will not be selected
-	enumEntry.OnChanged = func(s string) {
+	enumEntry.OnChanged = func(enum string) {
 		// parse enum values as string array
-		app.entity.Fields[selectedField.ID].EnumValues = strings.Split(strings.ReplaceAll(s, " ", ""), ",")
+		app.entity.Fields[selectedField.ID].EnumValues = strings.Split(strings.ReplaceAll(enum, " ", ""), ",")
+	}
+
+	defaultEntry := widget.NewEntry()
+	defaultEntry.PlaceHolder = "active"
+	defaultEntry.OnChanged = func(value string) {
+		app.entity.Fields[selectedField.ID].Default = value
+	}
+
+	checkEntry := widget.NewEntry()
+	checkEntry.PlaceHolder = "length(field) <= 20"
+	checkEntry.OnChanged = func(check string) {
+		app.entity.Fields[selectedField.ID].Check = check
 	}
 
 	fieldTypeSelect := widget.NewSelect(models.TypesString, func(selected string) {
 		selectedType, ok := models.ToType(selected)
 		if !ok {
 			err := fmt.Errorf("type %s is not supported", selectedType)
-			printer.Error("TYPE VALIDATION", err)
+			printer.Error(TagValidation, err)
 			dialog.ShowError(err, app.window)
 
 			return
@@ -70,13 +85,15 @@ func newFieldOption(app *App, selectedField *selectedField) fieldOptions {
 		}
 	})
 
-	nullableCheck := widget.NewCheck("Nullable", func(b bool) {
-		app.entity.Fields[selectedField.ID].Nullable = b
+	nullableCheck := widget.NewCheck("Nullable", func(nullable bool) {
+		app.entity.Fields[selectedField.ID].Nullable = nullable
 	})
 
 	return fieldOptions{
 		nameEntry:     nameEntry,
 		enumEntry:     enumEntry,
+		defaultEntry:  defaultEntry,
+		checkEntry:    checkEntry,
 		typeSelect:    fieldTypeSelect,
 		nullableCheck: nullableCheck,
 	}
@@ -87,9 +104,8 @@ func (a *App) generateWindow() fyne.CanvasObject {
 	var (
 		selectedField        = &selectedField{}
 		emptyOptionContainer = container.NewCenter()
+		option               = newFieldOption(a, selectedField)
 	)
-
-	option := newFieldOption(a, selectedField)
 
 	return container.NewBorder(
 		newEntityOptionsContainer(a),
@@ -139,8 +155,22 @@ func newFieldsListContainer(
 
 		if len(field.EnumValues) != 0 {
 			option.enumEntry.Text = strings.Join(field.EnumValues, ", ")
+			option.enumEntry.Enable()
 		} else {
 			option.enumEntry.Text = ""
+			option.enumEntry.Disable()
+		}
+
+		if field.Default != "" {
+			option.defaultEntry.Text = field.Default
+		} else {
+			option.defaultEntry.Text = ""
+		}
+
+		if field.Check != "" {
+			option.checkEntry.Text = field.Check
+		} else {
+			option.checkEntry.Text = ""
 		}
 
 		option.nullableCheck.Checked = field.Nullable
@@ -198,12 +228,6 @@ func newFieldsListContainer(
 
 // newEntityOptionsContainer returns container which stores all options for entity.
 func newEntityOptionsContainer(a *App) fyne.CanvasObject {
-	nameEntry := widget.NewEntry()
-	nameEntry.PlaceHolder = "user"
-	nameEntry.OnChanged = func(result string) {
-		a.entity.Name = result
-	}
-
 	tableEntry := widget.NewEntry()
 	tableEntry.PlaceHolder = "users"
 	tableEntry.OnChanged = func(result string) {
@@ -214,6 +238,23 @@ func newEntityOptionsContainer(a *App) fyne.CanvasObject {
 	packageEntry.PlaceHolder = "users"
 	packageEntry.OnChanged = func(result string) {
 		a.entity.Package = result
+		fmt.Println("package:", a.entity.Package)
+	}
+
+	nameEntry := widget.NewEntry()
+	nameEntry.PlaceHolder = "user"
+	nameEntry.OnChanged = func(result string) {
+		a.entity.Name = result
+
+		snake := strcase.ToSnake(result + "s")
+
+		tableEntry.Text = snake
+		a.entity.Table = snake
+		tableEntry.Refresh()
+
+		packageEntry.Text = snake
+		a.entity.Package = snake
+		packageEntry.Refresh()
 	}
 
 	paginationCheck := widget.NewCheck("With pagination", func(pagination bool) {
@@ -235,7 +276,38 @@ func newEntityOptionsContainer(a *App) fyne.CanvasObject {
 
 // newGenerateButton returns new button to start generator.
 func newGenerateButton(a *App) fyne.CanvasObject {
-	button := widget.NewButton("Generate", func() {
+	newInfinite := func() *widget.ProgressBarInfinite {
+		infinite := widget.NewProgressBarInfinite()
+		infinite.Stop()
+
+		return infinite
+	}
+
+	infinitesStart := func(infinites ...*widget.ProgressBarInfinite) {
+		for idx := range infinites {
+			infinites[idx].Start()
+		}
+	}
+
+	infinitesStopAndRefresh := func(infinites ...*widget.ProgressBarInfinite) {
+		for idx := range infinites {
+			infinites[idx].Stop()
+			infinites[idx].Refresh()
+		}
+	}
+
+	infiniteOne := newInfinite()
+	infiniteTwo := newInfinite()
+
+	var generateButton *widget.Button
+
+	generateButton = widget.NewButton("Generate", func() {
+		generateButton.Disable()
+		defer generateButton.Enable()
+
+		infinitesStart(infiniteOne, infiniteTwo)
+		defer infinitesStopAndRefresh(infiniteOne, infiniteTwo)
+
 		if err := a.entity.Validate(); err != nil {
 			dialog.ShowError(err, a.window)
 			return
@@ -257,16 +329,15 @@ func newGenerateButton(a *App) fyne.CanvasObject {
 		dialog.ShowInformation("Success", "Generated successfully!", a.window)
 	})
 
-	button.Alignment = widget.ButtonAlignCenter
+	generateButton.Importance = widget.HighImportance
+	generateButton.Alignment = widget.ButtonAlignCenter
 
-	return container.NewGridWithColumns(3, layout.NewSpacer(), button, layout.NewSpacer())
+	return container.NewGridWithColumns(3, infiniteOne, generateButton, infiniteTwo)
 }
 
 // newFieldOptionsContainer returns new container that stores field options.
 func newFieldOptionsContainer(option fieldOptions) fyne.Container {
-	return *container.NewGridWithRows(
-		3,
-		layout.NewSpacer(),
+	return *container.NewPadded(
 		container.New(
 			layout.NewFormLayout(),
 			newText("Name", 15, color.Black, true, false),
@@ -275,9 +346,12 @@ func newFieldOptionsContainer(option fieldOptions) fyne.Container {
 			option.typeSelect,
 			newText("Enum values", 15, color.Black, true, false),
 			option.enumEntry,
+			newText("Default", 15, color.Black, true, false),
+			option.defaultEntry,
+			newText("Check", 15, color.Black, true, false),
+			option.checkEntry,
 			newText("Options", 15, color.Black, true, false),
 			option.nullableCheck,
 		),
-		layout.NewSpacer(),
 	)
 }

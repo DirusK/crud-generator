@@ -31,6 +31,10 @@ func (e Entity) Validate() error {
 		errs = append(errs, "table name is required")
 	}
 
+	if len(e.Fields) == 0 {
+		errs = append(errs, "entity must not be empty")
+	}
+
 	for idx := range e.Fields {
 		if err := e.Fields[idx].Validate(); err != nil {
 			errs = append(errs, err.Error())

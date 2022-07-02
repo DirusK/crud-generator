@@ -32,3 +32,8 @@ func newResource(name string) *fyne.StaticResource {
 
 	return fyne.NewStaticResource(name, file)
 }
+
+// split function by `/` and '\' symbols.
+func split(r rune) bool {
+	return r == '/' || r == '\\'
+}

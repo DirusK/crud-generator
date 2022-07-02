@@ -57,7 +57,6 @@ func (r Repository) Create(ctx context.Context, entity {{.PackageDomainName}}) (
 	}()
 
 	var result {{.NameLowerCamel}}
-
 	if err = stmt.GetContext(ctx, &result, toDatabase(entity)); err != nil {
 		return {{.PackageDomainName}}{}, repository.ErrExecute{Cause: err.Error()}
 	}

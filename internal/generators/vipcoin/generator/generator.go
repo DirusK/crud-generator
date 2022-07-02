@@ -30,8 +30,3 @@ func NewGenerator(entity models.Entity, settings models.Settings) generators.Gen
 		),
 	}
 }
-
-func (g Generator) GenerateHandler() error {
-	// TODO implement me
-	panic("implement me")
-}

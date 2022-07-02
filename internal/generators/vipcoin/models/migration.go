@@ -4,8 +4,32 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/iancoleman/strcase"
+
 	"crud-generator-gui/internal/models"
 )
+
+// migrateStatement stores up and down statements for database migration.
+type migrateStatement struct {
+	Up   string
+	Down string
+}
+
+// newMigrateStatement returns a new migration statement.
+func newMigrateStatement(up string, down string) migrateStatement {
+	return migrateStatement{
+		Up:   up,
+		Down: down,
+	}
+}
+
+// extensions stores all possible extensions for migration.
+var extensions = map[models.Type]migrateStatement{
+	models.TypeUUID: newMigrateStatement(
+		`create extension if not exists "uuid-ossp";`,
+		`drop extension if exists "uuid-ossp";`,
+	),
+}
 
 func migrationDatabaseType(field Field, tableName string) string {
 	switch field.Type {
@@ -23,7 +47,7 @@ func migrationDatabaseType(field Field, tableName string) string {
 		return "boolean"
 	case models.TypeTime:
 		return "timestamp"
-	case models.TypeDecimal:
+	case models.TypeDecimal, models.TypeCoins:
 		return "numeric(32,16)"
 	case models.TypeFloat64, models.TypeFloat32:
 		return "numeric(32,16)"
@@ -34,29 +58,10 @@ func migrationDatabaseType(field Field, tableName string) string {
 	}
 }
 
-type statement struct {
-	Up   string
-	Down string
-}
-
-func newStatement(up string, down string) statement {
-	return statement{
-		Up:   up,
-		Down: down,
-	}
-}
-
-var extensions = map[models.Type]statement{
-	models.TypeUUID: newStatement(
-		`create extension if not exists "uuid-ossp";`,
-		`drop extension if exists "uuid-ossp";`,
-	),
-}
-
 func (e Entity) MigrationCreateExtensions() string {
 	var result []string
 
-	for fieldType := range e.MigrationExtensions {
+	for _, fieldType := range e.MigrationExtensions {
 		result = append(result, extensions[fieldType].Up)
 	}
 
@@ -66,7 +71,7 @@ func (e Entity) MigrationCreateExtensions() string {
 func (e Entity) MigrationDropExtensions() string {
 	var result []string
 
-	for fieldType := range e.MigrationExtensions {
+	for _, fieldType := range e.MigrationExtensions {
 		result = append(result, extensions[fieldType].Down)
 	}
 
@@ -85,7 +90,7 @@ func (e Entity) MigrationCreateTypes() string {
 			`create type %s_%s as enum (%s);`,
 			e.TableName(),
 			field.NameSnake(),
-			field.MigrationEnumArray(),
+			field.EnumMigrationArray(),
 		))
 	}
 
@@ -111,7 +116,7 @@ func (e Entity) MigrationDropTypes() string {
 }
 
 func (e Entity) MigrationTableFields() string {
-	checkNull := func(field Field) string {
+	prepareNull := func(field Field) string {
 		if field.Nullable {
 			return "null"
 		}
@@ -119,7 +124,7 @@ func (e Entity) MigrationTableFields() string {
 		return "not null"
 	}
 
-	checkIDField := func(field Field) string {
+	prepareIDField := func(field Field) string {
 		switch field.Type {
 		case models.TypeUUID:
 			return "uuid default uuid_generate_v4() primary key"
@@ -128,14 +133,35 @@ func (e Entity) MigrationTableFields() string {
 		}
 	}
 
+	prepareDefault := func(field Field) string {
+		if field.Default == "" {
+			return ""
+		}
+
+		switch field.Type {
+		case models.TypeString, models.TypeEnum:
+			return fmt.Sprintf("default '%s'", strcase.ToSnake(field.Default))
+		default:
+			return "default " + field.Default
+		}
+	}
+
+	prepareCheck := func(field Field) string {
+		if field.Check == "" {
+			return ""
+		}
+
+		return fmt.Sprintf("check(%s)", field.Check)
+	}
+
 	var result []string
 	for idx, field := range e.Fields {
 		if idx == 0 {
 			result = append(result, fmt.Sprintf(
 				"%s %s %s,",
 				field.NameSnake(),
-				checkIDField(field),
-				checkNull(field),
+				prepareIDField(field),
+				prepareNull(field),
 			))
 
 			continue
@@ -145,7 +171,7 @@ func (e Entity) MigrationTableFields() string {
 			"%s %s %s,",
 			field.NameSnake(),
 			migrationDatabaseType(field, e.TableName()),
-			checkNull(field),
+			prepareDefault(field)+" "+prepareNull(field)+" "+prepareCheck(field),
 		))
 	}
 

@@ -1,4 +1,4 @@
-package models
+package helpers
 
 import (
 	"strings"
@@ -12,8 +12,8 @@ var abbreviations = []string{
 	"Uri",
 }
 
-// replaceAbbreviations function to check if string contains abbreviation letters and replace them with upper case.
-func replaceAbbreviations(str string) string {
+// ReplaceAbbreviations function to check if string contains abbreviation letters and replace them with upper case.
+func ReplaceAbbreviations(str string) string {
 	for _, abbreviation := range abbreviations {
 		if strings.Contains(str, abbreviation) {
 			return strings.ReplaceAll(str, abbreviation, strings.ToUpper(abbreviation))

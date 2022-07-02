@@ -2,6 +2,8 @@
 package {{.PackageLower}}
 
 import (
+    "time"
+
     "github.com/brianvoe/gofakeit/v6"
 )
 
@@ -10,7 +12,7 @@ type FakeOption func({{.NameLowerCamel}} *{{.NameCamel}})
 
 // Fake{{.NameCamel}} returns new fake {{.NameCamel}}.
 func Fake{{.NameCamel}}(opts ...FakeOption) {{.NameCamel}} {
-    date := gofakeit.Date()
+    date := time.Now()
 
     {{.NameLowerCamel}} := {{.NameCamel}}{
         {{.FakeModel}}

@@ -2,6 +2,7 @@ package app
 
 import (
 	"image/color"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -23,19 +24,29 @@ func (a *App) settingsWindow() fyne.CanvasObject {
 	})
 
 	typeSelector.PlaceHolder = GeneratorVipCoin.String()
+	a.generatorType = GeneratorVipCoin
 
 	str := binding.NewString()
 
-	projectPathEntry := widget.NewEntryWithData(str)
-	projectPathEntry.PlaceHolder = "Path"
-	projectPathEntry.OnChanged = func(s string) {
-		a.settings.ProjectPath = s
-	}
-
 	moduleNameEntry := widget.NewEntry()
 	moduleNameEntry.PlaceHolder = "Name"
-	moduleNameEntry.OnChanged = func(s string) {
-		a.settings.ModuleName = s
+	moduleNameEntry.OnChanged = func(module string) {
+		a.settings.ModuleName = module
+	}
+
+	projectPathEntry := widget.NewEntryWithData(str)
+	projectPathEntry.PlaceHolder = "Path"
+	projectPathEntry.OnChanged = func(path string) {
+		a.settings.ProjectPath = path
+
+		parsed := strings.FieldsFunc(path, split)
+		if len(parsed) > 0 {
+			result := parsed[len(parsed)-1]
+			moduleNameEntry.Text = result
+			a.settings.ModuleName = result
+
+			moduleNameEntry.Refresh()
+		}
 	}
 
 	return container.New(
@@ -74,7 +85,9 @@ func newSettingsTitle(text string) fyne.CanvasObject {
 			layout.NewSpacer(),
 			newText(text, 20, color.Black, true, true),
 			layout.NewSpacer(),
-		), layout.NewSpacer())
+		),
+		layout.NewSpacer(),
+	)
 }
 
 // prepareCheckObjects return check boxes for generate options.

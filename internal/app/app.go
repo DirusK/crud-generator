@@ -27,8 +27,7 @@ type (
 // New application constructor.
 func New(appName string) *App {
 	return &App{
-		meta:          Meta{AppName: appName},
-		generatorType: GeneratorVipCoin,
+		meta: Meta{AppName: appName},
 	}
 }
 

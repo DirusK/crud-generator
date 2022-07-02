@@ -5,11 +5,11 @@ import (
 
 	"github.com/iancoleman/strcase"
 
-	"crud-generator-gui/internal/models"
+	domain "crud-generator-gui/internal/models"
 )
 
 type (
-	// Entity for VipCoin generator
+	// Entity for VipCoin generator.
 	Entity struct {
 		ModuleName          string
 		Name                string
@@ -20,22 +20,23 @@ type (
 		Fields              []Field
 	}
 
-	migrationExtensions map[models.Type]struct{}
+	migrationExtensions []domain.Type
 )
 
-func NewEntity(moduleName, name, packageName, tableName string, withPagination bool, fields []models.Field) Entity {
+// NewEntity constructor.
+func NewEntity(moduleName, name, packageName, tableName string, withPagination bool, fields []domain.Field) Entity {
 	var (
-		f   []Field
-		ext = make(migrationExtensions)
+		preparedFields []Field
+		extensions     migrationExtensions
 	)
 
 	for _, field := range fields {
 		switch field.Type {
-		case models.TypeUUID:
-			ext[models.TypeUUID] = struct{}{}
+		case domain.TypeUUID:
+			extensions = append(extensions, field.Type)
 		}
 
-		f = append(f, Field{Field: field})
+		preparedFields = append(preparedFields, NewField(field))
 	}
 
 	return Entity{
@@ -43,9 +44,9 @@ func NewEntity(moduleName, name, packageName, tableName string, withPagination b
 		Name:                name,
 		Package:             packageName,
 		Table:               tableName,
-		MigrationExtensions: ext,
+		MigrationExtensions: extensions,
 		WithPagination:      withPagination,
-		Fields:              f,
+		Fields:              preparedFields,
 	}
 }
 

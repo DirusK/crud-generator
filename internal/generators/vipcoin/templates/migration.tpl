@@ -1,7 +1,7 @@
 {{- /*gotype: crud-generator-gui/internal/generators/vipcoin/models.Entity*/ -}}
 -- +migrate Up
-{{.MigrationCreateExtensions}}
 
+{{.MigrationCreateExtensions}}
 {{.MigrationCreateTypes}}
 
 create table if not exists {{.TableName}}
@@ -12,7 +12,8 @@ create table if not exists {{.TableName}}
 );
 
 -- +migrate StatementBegin
-create or replace function trigger_set_updated_at() returns trigger as $$
+create or replace function trigger_set_updated_at() returns trigger as
+$$
 begin
     NEW.updated_at = now();
     return NEW;

@@ -9,7 +9,6 @@ import (
 // mainWindow is the main application gui window.
 func (a *App) mainWindow() fyne.Window {
 	fyneApplication := fyneApp.New()
-	// a.Settings().SetTheme(theme.DarkTheme())
 
 	tabs := container.NewAppTabs(
 		container.NewTabItemWithIcon("Generate", newResource("go_icon.png"), a.generateWindow()),

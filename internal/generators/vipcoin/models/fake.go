@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"crud-generator-gui/internal/generators/vipcoin/helpers"
 	"crud-generator-gui/internal/models"
 )
 
@@ -27,7 +28,7 @@ func FakeWith{{.FieldNameCamel}}({{.FieldNameLowerCamel}} {{.FieldType}}) FakeOp
 func fakeValue(field Field) string {
 	switch field.Type {
 	case models.TypeEnum:
-		return fmt.Sprintf(fakeEnum, field.NameCamel(true), field.EnumArray())
+		return fmt.Sprintf(fakeEnum, field.NameCamel(true), field.EnumStringArray())
 	default:
 		return defaultFakeValue[field.Type]
 	}
@@ -41,12 +42,12 @@ var defaultFakeValue = map[models.Type]string{
 	models.TypeInt8:    "gofakeit.Int8()",
 	models.TypeInt16:   "gofakeit.Int16()",
 	models.TypeInt32:   "gofakeit.Int32()",
-	models.TypeInt:     "gofakeit.IntRange(0, 1_000_000)",
+	models.TypeInt:     "int(gofakeit.Int32())",
 	models.TypeInt64:   "gofakeit.Int64()",
 	models.TypeUint8:   "gofakeit.Uint8()",
 	models.TypeUint16:  "gofakeit.Uint16()",
 	models.TypeUint32:  "gofakeit.Uint32()",
-	models.TypeUint:    "gofakeit.UintRange(0, 1_000_000)",
+	models.TypeUint:    "uint(gofakeit.Uint32())",
 	models.TypeUint64:  "gofakeit.Uint64()",
 	models.TypeFloat32: "gofakeit.Float32()",
 	models.TypeFloat64: "gofakeit.Float64()",
@@ -79,7 +80,7 @@ func (e Entity) FakeOptions() string {
 			fieldType = field.Type.String()
 		}
 
-		result = append(result, executeTemplateFromString(fakeOption, struct {
+		result = append(result, helpers.ExecuteTemplateFromString(fakeOption, struct {
 			FieldNameCamel      string
 			FieldNameLowerCamel string
 			FieldType           string
