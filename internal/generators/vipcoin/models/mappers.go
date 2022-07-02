@@ -127,3 +127,14 @@ func (e Entity) FromDomainToResponse() string {
 
 	return strings.Join(result, "\n\t\t")
 }
+
+func (e Entity) FromRequestToDomain() string {
+	var result []string
+
+	for _, field := range e.Fields {
+		name := field.NameCamel(true)
+		result = append(result, fmt.Sprintf("%s: %s.%s,", name, e.Reference(), name))
+	}
+
+	return strings.Join(result, "\n\t\t")
+}

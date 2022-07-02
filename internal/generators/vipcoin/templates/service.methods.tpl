@@ -32,6 +32,17 @@ func NewService(datastore *repository.Datastore, logger log.Logger) *Service {
 	}
 }
 
+// Create - method for creating {{.NameLowerCamel}}.
+func (s Service) Create(ctx context.Context, {{.NameLowerCamel}} {{.PackageDomainName}}) ({{.PackageDomainName}}, error) {
+	result, err := s.datastore.{{.NamesRepoCamel}}.Create(ctx, {{.NameLowerCamel}})
+	if err != nil {
+		s.logger.Error(err)
+		return {{.PackageDomainName}}{}, errs.Internal{}
+	}
+
+	return result, nil
+}
+
 // Get - method for getting only one {{.NameLowerCamel}}.
 func (s Service) Get(ctx context.Context, params filter.Filter) ({{.PackageDomainName}}, error) {
 	result, err := s.datastore.{{.NamesRepoCamel}}.Get(ctx, params)
@@ -61,17 +72,6 @@ func (s Service) GetAll(ctx context.Context, params filter.Filter) ({{.PackageDo
 		s.logger.Error(err)
 
 		return {{.PackageDomainByPagination}}{}, errs.Internal{}
-	}
-
-	return result, nil
-}
-
-// Create - method for creating {{.NameLowerCamel}}.
-func (s Service) Create(ctx context.Context, {{.NameLowerCamel}} {{.PackageDomainName}}) ({{.PackageDomainName}}, error) {
-	result, err := s.datastore.{{.NamesRepoCamel}}.Create(ctx, {{.NameLowerCamel}})
-	if err != nil {
-		s.logger.Error(err)
-		return {{.PackageDomainName}}{}, errs.Internal{}
 	}
 
 	return result, nil

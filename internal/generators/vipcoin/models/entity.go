@@ -62,6 +62,10 @@ func (e Entity) NamesKebab() string {
 	return strcase.ToKebab(e.Name + "s")
 }
 
+func (e Entity) NameLowerCamelRequest() string {
+	return strcase.ToLowerCamel(e.Name + "Request")
+}
+
 func (e Entity) ModuleNameLower() string {
 	return strings.ToLower(e.ModuleName)
 }

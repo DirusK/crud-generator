@@ -31,12 +31,33 @@ func NewHandler({{.NamesServiceLowerCamel}} services.{{.Interface}}) *Handler {
 	}
 }
 
+// Create - define http handler method for creating {{.NameLowerCamel}}.
+func (h Handler) Create(ctx *fiber.Ctx) error {
+	request, err := h.{{.NameLowerCamelRequest}}FromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	{{.NameLowerCamel}}, err := h.{{.NamesServiceLowerCamel}}.Create(ctx.Context(), request.toDomain())
+	if err != nil {
+		return err
+	}
+
+	return h.Respond(ctx, fiber.StatusCreated, toResponse({{.NameLowerCamel}}))
+}
+
 // Get - define http handler method which responds with one {{.NameLowerCamel}} by specified id.
 func (h Handler) Get(ctx *fiber.Ctx) error {
+{{ if eq `uuid.UUID` .FieldIDType}} id, err := http.GetUUID(ctx, parameter{{.FieldIDCamel}})
+	if err != nil {
+		return err
+	}
+{{ else }}
 	id, err := h.GetCustomParameterID(ctx, parameter{{.FieldIDCamel}})
 	if err != nil {
 		return err
 	}
+{{ end }}
 
 	result, err := h.{{.NamesServiceLowerCamel}}.Get(
 		ctx.Context(),
@@ -72,12 +93,46 @@ func (h Handler) GetAll(ctx *fiber.Ctx) error {
 	return h.Respond(ctx, fiber.StatusOK, toResponseList(result{{if .WithPaginationCheck}},request.Pagination {{ end }}))
 }
 
-// Delete - define http handler method which deletes {{.NameLowerCamel}} by specified id.
-func (h Handler) Delete(ctx *fiber.Ctx) error {
+// Update - define http handler method for updating {{.NameLowerCamel}}.
+func (h Handler) Update(ctx *fiber.Ctx) error {
+	request, err := h.{{.NameLowerCamelRequest}}FromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+{{ if eq `uuid.UUID` .FieldIDType}}
+	id, err := http.GetUUID(ctx, parameter{{.FieldIDCamel}})
+	if err != nil {
+		return err
+	}
+{{ else }}
 	id, err := h.GetCustomParameterID(ctx, parameter{{.FieldIDCamel}})
 	if err != nil {
 		return err
 	}
+{{ end }}
+
+	request.{{.FieldIDCamel}} = {{ if eq `uint64` .FieldIDType }} id {{ else if eq `uuid.UUID` .FieldIDType }} id  {{ else }}{{.FieldIDType}}(id) {{ end }}
+
+	if err = h.{{.NamesServiceLowerCamel}}.Update(ctx.Context(), request.toDomain()); err != nil {
+		return err
+	}
+
+	return h.RespondEmpty(ctx, fiber.StatusOK)
+}
+
+// Delete - define http handler method which deletes {{.NameLowerCamel}} by specified id.
+func (h Handler) Delete(ctx *fiber.Ctx) error {
+{{ if eq `uuid.UUID` .FieldIDType}}		id, err := http.GetUUID(ctx, parameter{{.FieldIDCamel}})
+	if err != nil {
+		return err
+	}
+	{{ else }}
+	id, err := h.GetCustomParameterID(ctx, parameter{{.FieldIDCamel}})
+	if err != nil {
+		return err
+	}
+	{{ end }}
 
 	if err = h.{{.NamesServiceLowerCamel}}.Delete(ctx.Context(), id); err != nil {
 		return err

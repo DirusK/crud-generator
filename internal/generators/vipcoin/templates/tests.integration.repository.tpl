@@ -159,7 +159,7 @@ func TestRepository_Delete(t *testing.T) {
 			name: "[success] delete {{.NameLowerCamel}}",
 			args: args{
 				ctx: context.Background(),
-				{{.FieldIDCamel}}:  1, // TODO: Replace ID value.
+				{{.FieldIDCamel}}:  {{ if eq `uuid.UUID` .FieldIDType}} uuid.MustParse("set your uuid here") {{ else }} 1 {{end}}, // TODO: Replace ID value.
 			},
 			wantErr: false,
 		},
@@ -190,8 +190,8 @@ func TestRepository_Update(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				{{.NamesLowerCamel}}: []domain.{{.NameCamel}}{ // TODO: Replace with your data.
-					domain.Fake{{.NameCamel}}(),
-					domain.Fake{{.NameCamel}}(),
+					domain.Fake{{.NameCamel}}(domain.FakeWith{{.FieldIDCamel}}({{ if eq `uuid.UUID` .FieldIDType}} uuid.MustParse("set your uuid here") {{ else }} 1 {{end}})),
+					domain.Fake{{.NameCamel}}(domain.FakeWith{{.FieldIDCamel}}({{ if eq `uuid.UUID` .FieldIDType}} uuid.MustParse("set your uuid here") {{ else }} 2 {{end}})),
 				},
 			},
 			wantErr: false,
