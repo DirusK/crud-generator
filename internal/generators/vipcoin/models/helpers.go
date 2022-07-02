@@ -7,6 +7,7 @@ import (
 	"crud-generator-gui/pkg/printer"
 )
 
+// executeTemplateFromString receives string template and executes it.
 func executeTemplateFromString(tmpl string, data any) string {
 	parser, err := template.New("parser").Parse(tmpl)
 	if err != nil {

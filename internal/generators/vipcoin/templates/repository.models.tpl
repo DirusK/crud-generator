@@ -23,7 +23,7 @@ type (
 	}
 )
 
-// toDatabase converts domain {{.PackageDomainName}} to database model.
+// toDatabase converts domain {{.NameCamel}} to database model.
 func toDatabase(domain {{.PackageDomainName}}) {{.NameLowerCamel}} {
 	return {{.NameLowerCamel}}{
 		{{.FromDomainToDatabase}}

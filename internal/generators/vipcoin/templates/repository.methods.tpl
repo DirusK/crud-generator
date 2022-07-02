@@ -75,11 +75,11 @@ func (r Repository) Get(ctx context.Context, filter filter.Filter) ({{.PackageDo
 	var result {{.NameLowerCamel}}
 
 	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
-			return {{.PackageDomainName}}{}, repository.ErrExecute{Cause: err.Error()}
+		if errors.Is(err, sql.ErrNoRows) {
+			return {{.PackageDomainName}}{}, repository.ErrNotFound{What: "{{.NameLowerCamel}}"}
 		}
 
-		return {{.PackageDomainName}}{}, repository.ErrNotFound{What: "{{.NameLowerCamel}}"}
+		return {{.PackageDomainName}}{}, repository.ErrExecute{Cause: err.Error()}
 	}
 
 	return result.toDomain(), nil

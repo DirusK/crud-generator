@@ -17,18 +17,6 @@ type (
 	}
 )
 
-func (e Entity) GetEnumFields() []Field {
-	var enums []Field
-
-	for _, field := range e.Fields {
-		if field.IsEnum() {
-			enums = append(enums, field)
-		}
-	}
-
-	return enums
-}
-
 // Validate entity with fields.
 func (e Entity) Validate() error {
 	var errs []string

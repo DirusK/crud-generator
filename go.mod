@@ -6,6 +6,7 @@ require (
 	fyne.io/fyne/v2 v2.2.1
 	github.com/brianvoe/gofakeit/v6 v6.16.0
 	github.com/fatih/color v1.7.0
+	github.com/google/martian v2.1.0+incompatible
 	github.com/iancoleman/strcase v0.2.0
 	github.com/pkg/errors v0.8.1
 )

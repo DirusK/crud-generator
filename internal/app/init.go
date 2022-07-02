@@ -7,8 +7,10 @@ import (
 )
 
 type (
+	// GeneratorType represents the type of generator.
 	GeneratorType string
 
+	// GeneratorInit init function to create new generator.
 	GeneratorInit func(entity models.Entity, settings models.Settings) generators.Generator
 )
 

@@ -19,12 +19,16 @@ import (
 const defaultFieldName = "Field"
 
 type (
+	// selectedField contains information about list of fields.
+	//  ID - selected item ID from the list
+	// 	selected - flag if item is chosen.
 	selectedField struct {
-		id       int
+		ID       int
 		selected bool
 	}
 
-	fieldOption struct {
+	// fieldOptions contains widgets for configuring field.
+	fieldOptions struct {
 		nameEntry     *widget.Entry
 		enumEntry     *widget.Entry
 		typeSelect    *widget.Select
@@ -32,18 +36,20 @@ type (
 	}
 )
 
-func newFieldOption(a *App, selectedField *selectedField) fieldOption {
-	fieldNameEntry := widget.NewEntry()
-	fieldNameEntry.PlaceHolder = "Status"
-	fieldNameEntry.OnChanged = func(s string) {
-		a.entity.Fields[selectedField.id].Name = s
+// newFieldOption inits new field option widgets.
+func newFieldOption(app *App, selectedField *selectedField) fieldOptions {
+	nameEntry := widget.NewEntry()
+	nameEntry.PlaceHolder = "Status"
+	nameEntry.OnChanged = func(s string) {
+		app.entity.Fields[selectedField.ID].Name = s
 	}
 
-	fieldEnumEntry := widget.NewEntry()
-	fieldEnumEntry.PlaceHolder = "active, pending, done"
-	fieldEnumEntry.Disable()
-	fieldEnumEntry.OnChanged = func(s string) {
-		a.entity.Fields[selectedField.id].EnumValues = strings.Split(strings.ReplaceAll(s, " ", ""), ",")
+	enumEntry := widget.NewEntry()
+	enumEntry.PlaceHolder = "active, pending, done"
+	enumEntry.Disable() // disable until enum type will not be selected
+	enumEntry.OnChanged = func(s string) {
+		// parse enum values as string array
+		app.entity.Fields[selectedField.ID].EnumValues = strings.Split(strings.ReplaceAll(s, " ", ""), ",")
 	}
 
 	fieldTypeSelect := widget.NewSelect(models.TypesString, func(selected string) {
@@ -51,32 +57,32 @@ func newFieldOption(a *App, selectedField *selectedField) fieldOption {
 		if !ok {
 			err := fmt.Errorf("type %s is not supported", selectedType)
 			printer.Error("TYPE VALIDATION", err)
-			dialog.ShowError(err, a.window)
+			dialog.ShowError(err, app.window)
 
 			return
 		}
 
-		a.entity.Fields[selectedField.id].Type = selectedType
+		app.entity.Fields[selectedField.ID].Type = selectedType
 		if selectedType == models.TypeEnum {
-			fieldEnumEntry.Enable()
+			enumEntry.Enable()
 		} else {
-			fieldEnumEntry.Disable()
+			enumEntry.Disable()
 		}
 	})
 
 	nullableCheck := widget.NewCheck("Nullable", func(b bool) {
-		a.entity.Fields[selectedField.id].Nullable = b
+		app.entity.Fields[selectedField.ID].Nullable = b
 	})
 
-	return fieldOption{
-		nameEntry:     fieldNameEntry,
-		enumEntry:     fieldEnumEntry,
+	return fieldOptions{
+		nameEntry:     nameEntry,
+		enumEntry:     enumEntry,
 		typeSelect:    fieldTypeSelect,
 		nullableCheck: nullableCheck,
 	}
 }
 
-// generateWindow returns main generate window.
+// generateWindow returns main Generate window.
 func (a *App) generateWindow() fyne.CanvasObject {
 	var (
 		selectedField        = &selectedField{}
@@ -86,21 +92,22 @@ func (a *App) generateWindow() fyne.CanvasObject {
 	option := newFieldOption(a, selectedField)
 
 	return container.NewBorder(
-		prepareEntityOptionsContainer(a),
-		prepareGenerateButton(a),
+		newEntityOptionsContainer(a),
+		newGenerateButton(a),
 		nil,
 		nil,
 		container.NewHSplit(
-			prepareFieldsListContainer(a, selectedField, option, emptyOptionContainer),
+			newFieldsListContainer(a, selectedField, option, emptyOptionContainer),
 			emptyOptionContainer,
 		),
 	)
 }
 
-func prepareFieldsListContainer(
+// newFieldsListContainer returns new container that stores list of fields.
+func newFieldsListContainer(
 	a *App,
 	selectedField *selectedField,
-	option fieldOption,
+	option fieldOptions,
 	optionsContainer fyne.CanvasObject,
 ) fyne.CanvasObject {
 	list := widget.NewList(func() int {
@@ -112,7 +119,7 @@ func prepareFieldsListContainer(
 	})
 
 	list.OnSelected = func(id widget.ListItemID) {
-		selectedField.id = id
+		selectedField.ID = id
 		selectedField.selected = true
 
 		field := a.entity.Fields[id]
@@ -147,7 +154,7 @@ func prepareFieldsListContainer(
 
 	addButton := widget.NewButton("ADD", func() {
 		if len(a.entity.Fields) == 0 {
-			*optionsContainer.(*fyne.Container) = prepareFieldOptionsContainer(option)
+			*optionsContainer.(*fyne.Container) = newFieldOptionsContainer(option)
 		}
 
 		a.entity.Fields = append(a.entity.Fields, models.Field{Name: defaultFieldName})
@@ -162,14 +169,11 @@ func prepareFieldsListContainer(
 			}
 		}()
 
-		// fmt.Println("ID:", selectedField.id)
-		// fmt.Println("Selected:", selectedField.selected)
-
 		if selectedField.selected == false {
 			return
 		}
 
-		a.entity.Fields = append(a.entity.Fields[:selectedField.id], a.entity.Fields[selectedField.id+1:]...)
+		a.entity.Fields = append(a.entity.Fields[:selectedField.ID], a.entity.Fields[selectedField.ID+1:]...)
 
 		if len(a.entity.Fields) == 0 {
 			*optionsContainer.(*fyne.Container) = fyne.Container{}
@@ -192,7 +196,8 @@ func prepareFieldsListContainer(
 	return listContainer
 }
 
-func prepareEntityOptionsContainer(a *App) fyne.CanvasObject {
+// newEntityOptionsContainer returns container which stores all options for entity.
+func newEntityOptionsContainer(a *App) fyne.CanvasObject {
 	nameEntry := widget.NewEntry()
 	nameEntry.PlaceHolder = "user"
 	nameEntry.OnChanged = func(result string) {
@@ -228,7 +233,8 @@ func prepareEntityOptionsContainer(a *App) fyne.CanvasObject {
 	)
 }
 
-func prepareGenerateButton(a *App) fyne.CanvasObject {
+// newGenerateButton returns new button to start generator.
+func newGenerateButton(a *App) fyne.CanvasObject {
 	button := widget.NewButton("Generate", func() {
 		if err := a.entity.Validate(); err != nil {
 			dialog.ShowError(err, a.window)
@@ -243,7 +249,7 @@ func prepareGenerateButton(a *App) fyne.CanvasObject {
 		a.setGenerator(generatorsInit[a.generatorType])
 
 		if err := a.generate(); err != nil {
-			printer.Error("GENERATOR", err)
+			printer.Error(TagGenerator, err)
 			dialog.ShowError(err, a.window)
 			return
 		}
@@ -256,7 +262,8 @@ func prepareGenerateButton(a *App) fyne.CanvasObject {
 	return container.NewGridWithColumns(3, layout.NewSpacer(), button, layout.NewSpacer())
 }
 
-func prepareFieldOptionsContainer(option fieldOption) fyne.Container {
+// newFieldOptionsContainer returns new container that stores field options.
+func newFieldOptionsContainer(option fieldOptions) fyne.Container {
 	return *container.NewGridWithRows(
 		3,
 		layout.NewSpacer(),

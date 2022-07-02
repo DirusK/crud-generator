@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
 )
 
@@ -14,41 +13,11 @@ type (
 		Name       string
 		Type       Type
 		EnumValues []string
+		Default    string
+		Check      string
 		Nullable   bool
 	}
 )
-
-func (f Field) IsEnum() bool {
-	return f.Type == TypeEnum
-}
-
-func (f Field) GoFileSnakeWithExtension() string {
-	return strcase.ToSnake(f.Name) + ".go"
-}
-
-func (f Field) NameCamel(withAbbreviation bool) string {
-	result := strcase.ToCamel(f.Name)
-
-	if withAbbreviation {
-		return replaceAbbreviations(result)
-	}
-
-	return result
-}
-
-func (f Field) NameLowerCamel(withAbbreviation bool) string {
-	result := strcase.ToLowerCamel(f.Name)
-
-	if withAbbreviation {
-		return replaceAbbreviations(result)
-	}
-
-	return result
-}
-
-func (f Field) NameSnake() string {
-	return strcase.ToSnake(f.Name)
-}
 
 // Validate field.
 func (f Field) Validate() error {

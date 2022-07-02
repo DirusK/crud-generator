@@ -21,6 +21,7 @@ func (a *App) settingsWindow() fyne.CanvasObject {
 	typeSelector := widget.NewSelect(generatorsString, func(s string) {
 		a.generatorType = GeneratorType(s)
 	})
+
 	typeSelector.PlaceHolder = GeneratorVipCoin.String()
 
 	str := binding.NewString()
