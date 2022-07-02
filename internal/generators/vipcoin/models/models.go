@@ -32,6 +32,25 @@ func dbNullType(fieldType models.Type) string {
 	}
 }
 
+func (e Entity) ResponseModel() string {
+	var result []string
+
+	for _, field := range e.Fields {
+		tag := fmt.Sprintf(`json:"%s"`, field.NameSnake())
+
+		var fieldType string
+		if field.Type == models.TypeEnum {
+			fieldType = e.Package + "." + field.NameCamel(true)
+		} else {
+			fieldType = field.Type.String()
+		}
+
+		result = append(result, fmt.Sprintf("%s %s `%s`", field.NameCamel(true), fieldType, tag))
+	}
+
+	return strings.Join(result, "\n\t\t")
+}
+
 func (e Entity) DatabaseModel() string {
 	var result []string
 

@@ -1,49 +1,56 @@
-package {{.Package}}
+{{- /*gotype: crud-generator-gui/internal/generators/vipcoin/models.Entity*/ -}}
+package {{.PackageLower}}
+
+import (
+	"git.ooo.ua/vipcoin/lib/http/query"
+
+	"{{.ModuleNameLower}}/internal/api/domain/{{.PackageLower}}"
+)
 
 type (
-	// {{.Entity}} - response model for {{.Entity}}.
-	{{.Entity}} struct {
+	// {{.NameLowerCamel}} - response model for {{.NameCamel}}.
+	{{.NameLowerCamel}} struct {
 		{{.ResponseModel}}
 	}
 
-{{if .WithPagination}}
+{{ if .WithPagination }}
 
-	// {{.EntityListPrivate}} - response model for list of {{.EntitiesPrivate}}.
-		{{.EntityListPrivate}} struct {
-		{{.EntitiesPublic}} []{{.Entity}} `json:"{{.CamelNames}}"`
+	// {{.ListLowerCamel}} - response model for list of {{.NamesCamel}}.
+		{{.ListLowerCamel}} struct {
+		{{.NamesCamel}} []{{.NameLowerCamel}} `json:"{{.NamesSnake}}"`
 	}
 
-	// {{.EntityListPrivate}}Response - response model with pagination and data.
-	{{.EntityListPrivate}}Response struct {
-		Result {{.EntityListPrivate}} `json:"result"`
+	// {{.NamesLowerCamelResponse}} - response model with pagination and data.
+	{{.NamesLowerCamelResponse}} struct {
+		Data {{.ListLowerCamel}} `json:"data"`
 		Pagination query.PaginationRequest `json:"pagination"`
 	}
 
 {{ else }}
 
-	// {{.EntityListPrivate}} - response model for list of {{.EntitiesPrivate}}.
-	{{.EntityListPrivate}} []{{.Entity}}
+	// {{.ListLowerCamel}} - response model for list of {{.NamesCamel}}.
+	{{.ListLowerCamel}} []{{.NameLowerCamel}}
 
 {{ end }}
 )
 
-// toResponse converts domain {{.DomainPkg}} to response {{.Entity}} model.
-func toResponse(domain {{.DomainPkg}}) {{.Entity}} {
-	return {{.Entity}}{
-		{{.FromDomain}}
+// toResponse converts domain {{.PackageDomainName}} to response {{.NameLowerCamel}} model.
+func toResponse(domain {{.PackageDomainName}}) {{.NameLowerCamel}} {
+	return {{.NameLowerCamel}}{
+		{{.FromDomainToResponse}}
 	}
 }
-{{if .WithPagination}}
-// toResponseList converts domain {{.DomainPkgList}} to response {{.EntityListPrivate}} model.
-func toResponseList(list {{.DomainPkgList}}, pagination query.PaginationRequest) {{.EntityListPrivate}}Response {
-	response := make([]{{.Entity}}, 0, len(list.{{.EntitiesPublic}}))
-	for _, ent := range list.{{.EntitiesPublic}} {
-		response = append(response, toResponse(ent))
+{{ if .WithPagination }}
+// toResponseList converts domain {{.ListCamel}} to response {{.NamesLowerCamelResponse}} model.
+func toResponseList(list {{.PackageDomainNameList}}, pagination query.PaginationRequest) {{.NamesLowerCamelResponse}} {
+	response := make([]{{.NameLowerCamel}}, 0, len(list.{{.NamesCamel}}))
+	for _, {{.NameLowerCamel}} := range list.{{.NamesCamel}} {
+		response = append(response, toResponse({{.NameLowerCamel}}))
 	}
 
-	return {{.EntityListPrivate}}Response {
-		Result: {{.EntityListPrivate}}{
-			{{.EntitiesPublic}}: response,
+	return {{.NamesLowerCamelResponse}} {
+		Data: {{.ListLowerCamel}}{
+			{{.NamesCamel}}: response,
 		},
 		Pagination: query.PaginationRequest{
 			Offset: pagination.Offset,
@@ -52,13 +59,14 @@ func toResponseList(list {{.DomainPkgList}}, pagination query.PaginationRequest)
 		},
 	}
 }
+
 {{ else }}
 
-// toResponseList converts domain {{.DomainPkgList}} to response {{.EntityListPrivate}} model.
-func toResponseList(domain {{.DomainPkgList}}) {{.EntityListPrivate}} {
-	response := make({{.EntityListPrivate}}, 0, len(domain))
-	for _, vote := range domain {
-		response = append(response, toResponse(vote))
+// toResponseList converts domain {{.ListCamel}} to response {{.ListLowerCamel}} model.
+func toResponseList(domain {{.PackageDomainNames}}) {{.ListLowerCamel}} {
+	response := make({{.ListLowerCamel}}, 0, len(domain))
+	for _, {{.NameLowerCamel}} := range domain {
+		response = append(response, toResponse({{.NameLowerCamel}}))
 	}
 
 	return response

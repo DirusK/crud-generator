@@ -1,10 +1,11 @@
-package {{.Package}}
+{{- /*gotype: crud-generator-gui/internal/generators/vipcoin/models.Entity*/ -}}
+package {{.PackageLower}}
 
 import (
 	"strconv"
 
-	"{{.Project}}/internal/api/domain/{{.Package}}"
-	"{{.Project}}/internal/api/services"
+	"{{.ModuleNameLower}}/internal/api/domain/{{.PackageLower}}"
+	"{{.ModuleNameLower}}/internal/api/services"
 
 	"git.ooo.ua/vipcoin/lib/filter"
 	"git.ooo.ua/vipcoin/lib/http/query"
@@ -13,34 +14,33 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-//go:generate ifacemaker -f {{.CurrentFile}} -s Handler -p delivery -i {{.Interface}}HTTP -y "{{.Interface}}HTTP - describe an interface for working with {{.Entities}} over HTTP."
+//go:generate ifacemaker -f {{.GoFileSnakeWithExtension}} -s Handler -p delivery -i {{.Interface}}HTTP -y "{{.Interface}}HTTP - describe an interface for working with {{.NamesLowerCamel}} over HTTP."
 
 var _ delivery.{{.Interface}}HTTP = &Handler{}
 
-// Handler - define http handler struct for handling {{.Entity}} requests.
+// Handler - define http handler struct for handling {{.NameLowerCamel}} requests.
 type Handler struct {
 	responder.Responder
-	{{.ServiceName}} services.{{.Interface}}
+	{{.NamesServiceLowerCamel}} services.{{.Interface}}
 }
 
 // NewHandler - constructor.
-func NewHandler({{.Entities}} services.{{.Interface}}) *Handler {
+func NewHandler({{.NamesServiceLowerCamel}} services.{{.Interface}}) *Handler {
 	return &Handler{
-		{{.ServiceName}}: {{.Entities}},
+		{{.NamesServiceLowerCamel}}: {{.NamesServiceLowerCamel}},
 	}
 }
 
-// Get - define http handler method which responds with one {{.Entity}} by specified id.
+// Get - define http handler method which responds with one {{.NameLowerCamel}} by specified id.
 func (h Handler) Get(ctx *fiber.Ctx) error {
-	id, err := h.GetCustomParameterID(ctx, parameterID)
+	id, err := h.GetCustomParameterID(ctx, parameter{{.FieldIDCamel}})
 	if err != nil {
 		return err
 	}
 
-
-	result, err := h.{{.ServiceName}}.Get(
+	result, err := h.{{.NamesServiceLowerCamel}}.Get(
 		ctx.Context(),
-		filter.NewFilter().SetArgument({{.Package}}.FieldID, id))
+		filter.NewFilter().SetArgument({{.PackageLower}}.Field{{.FieldIDCamel}}, id))
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (h Handler) Get(ctx *fiber.Ctx) error {
 	return h.Respond(ctx, fiber.StatusOK, toResponse(result))
 }
 
-// GetAll - define http handler method with all {{.Entities}}.
+// GetAll - define http handler method which responds with all {{.NamesLowerCamel}}.
 func (h Handler) GetAll(ctx *fiber.Ctx) error {
 	request := query.NewRequest(ctx, query.WithDefaultCondition(filter.ConditionAND))
 	if err := request.SetArgumentsFromStruct(&getAllFilter{}); err != nil {
@@ -59,27 +59,27 @@ func (h Handler) GetAll(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	{{if .WithPagination}}
+	{{if .WithPaginationCheck}}
 	if err := request.SetPagination(defaultLimit); err != nil {
 		return err
 	}
 	{{ end }}
-	result, err := h.{{.ServiceName}}.GetAll(ctx.Context(), request.ToFilter())
+	result, err := h.{{.NamesServiceLowerCamel}}.GetAll(ctx.Context(), request.ToFilter())
 	if err != nil {
 		return err
 	}
 
-	return h.Respond(ctx, fiber.StatusOK, toResponseList(result{{if .WithPagination}},request.Pagination {{ end }}))
+	return h.Respond(ctx, fiber.StatusOK, toResponseList(result{{if .WithPaginationCheck}},request.Pagination {{ end }}))
 }
 
-// Delete - define http handler method which deletes {{.Entity}} by specified id.
+// Delete - define http handler method which deletes {{.NameLowerCamel}} by specified id.
 func (h Handler) Delete(ctx *fiber.Ctx) error {
-	id, err := h.GetCustomParameterID(ctx, parameterID)
+	id, err := h.GetCustomParameterID(ctx, parameter{{.FieldIDCamel}})
 	if err != nil {
 		return err
 	}
 
-	if err = h.{{.ServiceName}}.Delete(ctx.Context(), id); err != nil {
+	if err = h.{{.NamesServiceLowerCamel}}.Delete(ctx.Context(), id); err != nil {
 		return err
 	}
 

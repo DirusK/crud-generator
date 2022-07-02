@@ -26,7 +26,7 @@ var generatorsInit = map[GeneratorType]GeneratorInit{
 
 // GeneratorsString array of generators in string representation.
 var generatorsString = []string{
-	GeneratorDefault.String(),
+	// GeneratorDefault.String(),
 	GeneratorVipCoin.String(),
 }
 

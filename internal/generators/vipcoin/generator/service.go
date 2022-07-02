@@ -13,7 +13,7 @@ func (g Generator) GenerateService() error {
 		return errors.Wrap(err, "can't make service directory")
 	}
 
-	if err := g.generateServiceMethods(dirPath); err != nil {
+	if err := g.generateHandlerMethods(dirPath); err != nil {
 		return err
 	}
 

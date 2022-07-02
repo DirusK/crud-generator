@@ -82,8 +82,16 @@ func (e Entity) NamesLowerCamel() string {
 	return strcase.ToLowerCamel(e.Name) + "s"
 }
 
+func (e Entity) NamesLowerCamelResponse() string {
+	return strcase.ToLowerCamel(e.Name) + "sResponse"
+}
+
 func (e Entity) NamesCamel() string {
 	return strcase.ToCamel(e.Name) + "s"
+}
+
+func (e Entity) NamesSnake() string {
+	return strcase.ToSnake(e.Name) + "s"
 }
 
 func (e Entity) ListCamel() string {
@@ -100,6 +108,10 @@ func (e Entity) NamesRepoCamel() string {
 
 func (e Entity) NamesServiceCamel() string {
 	return strcase.ToCamel(e.Name + "sService")
+}
+
+func (e Entity) NamesServiceLowerCamel() string {
+	return strcase.ToLowerCamel(e.Name + "sService")
 }
 
 func (e Entity) Reference() string {
