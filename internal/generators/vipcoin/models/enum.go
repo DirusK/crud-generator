@@ -6,7 +6,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 
-	"crud-generator-gui/internal/generators/vipcoin/helpers"
+	"crud-generator/internal/generators/vipcoin/helpers"
 )
 
 const IsEnumCheckTemplate = `// Is{{.NameWithValueCamel}} check if {{.EntityNameCamel}} {{.NameLowerCamel}} is {{.NameWithValueCamel}}.

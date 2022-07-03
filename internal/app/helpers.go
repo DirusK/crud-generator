@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 
-	"crud-generator-gui/pkg/printer"
+	"crud-generator/pkg/printer"
 )
 
 //go:embed assets

@@ -12,8 +12,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/iancoleman/strcase"
 
-	"crud-generator-gui/internal/models"
-	"crud-generator-gui/pkg/printer"
+	"crud-generator/internal/models"
+	"crud-generator/pkg/printer"
 )
 
 // defaultFieldName returns default name for field in entity creation.

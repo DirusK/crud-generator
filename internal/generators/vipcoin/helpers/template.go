@@ -4,7 +4,7 @@ import (
 	"strings"
 	"text/template"
 
-	"crud-generator-gui/pkg/printer"
+	"crud-generator/pkg/printer"
 )
 
 // TagParser parser tag.

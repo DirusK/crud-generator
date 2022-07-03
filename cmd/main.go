@@ -1,6 +1,6 @@
 package main
 
-import "crud-generator-gui/internal/app"
+import "crud-generator/internal/app"
 
 const appName = "CRUD generator"
 

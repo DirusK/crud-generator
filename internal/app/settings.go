@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
-	"crud-generator-gui/pkg/printer"
+	"crud-generator/pkg/printer"
 )
 
 // settings returns settings window.

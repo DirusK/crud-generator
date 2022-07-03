@@ -3,9 +3,9 @@ package generator
 import (
 	"text/template"
 
-	"crud-generator-gui/internal/generators"
-	vipcoin "crud-generator-gui/internal/generators/vipcoin/models"
-	"crud-generator-gui/internal/models"
+	"crud-generator/internal/generators"
+	vipcoin "crud-generator/internal/generators/vipcoin/models"
+	"crud-generator/internal/models"
 )
 
 // Generator main structure.

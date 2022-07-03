@@ -3,8 +3,8 @@ package app
 import (
 	"fyne.io/fyne/v2"
 
-	"crud-generator-gui/internal/generators"
-	"crud-generator-gui/internal/models"
+	"crud-generator/internal/generators"
+	"crud-generator/internal/models"
 )
 
 type (

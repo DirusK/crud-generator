@@ -1,9 +1,9 @@
 package app
 
 import (
-	"crud-generator-gui/internal/generators"
-	vipcoin "crud-generator-gui/internal/generators/vipcoin/generator"
-	"crud-generator-gui/internal/models"
+	"crud-generator/internal/generators"
+	vipcoin "crud-generator/internal/generators/vipcoin/generator"
+	"crud-generator/internal/models"
 )
 
 type (

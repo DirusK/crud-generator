@@ -1,4 +1,4 @@
-module crud-generator-gui
+module crud-generator
 
 go 1.18
 
@@ -10,12 +10,15 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/pkg/errors v0.8.1
 )
-
+ 
 require (
 	fyne.io/systray v1.10.0 // indirect
+	github.com/BurntSushi/toml v1.1.0 // indirect
+	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/fyne-io/fyne-cross v1.2.1 // indirect
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe // indirect
 	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504 // indirect
 	github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2 // indirect

@@ -6,7 +6,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 
-	"crud-generator-gui/internal/models"
+	"crud-generator/internal/models"
 )
 
 // migrateStatement stores up and down statements for database migration.

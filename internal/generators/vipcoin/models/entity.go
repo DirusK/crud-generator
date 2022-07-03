@@ -5,7 +5,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 
-	domain "crud-generator-gui/internal/models"
+	domain "crud-generator/internal/models"
 )
 
 type (

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"crud-generator-gui/internal/models"
+	"crud-generator/internal/models"
 )
 
 func toNullConverter(fieldType models.Type) string {

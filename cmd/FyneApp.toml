@@ -1,0 +1,6 @@
+[Details]
+  Icon = "../internal/app/assets/go_icon.png"
+  Name = "CRUD Generator"
+  ID = "crud.generator"
+  Version = "1.0.0"
+  Build = 5
