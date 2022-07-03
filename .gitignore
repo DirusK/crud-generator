@@ -1,0 +1,24 @@
+# Fyne cross compilation
+fyne-cross/
+
+# IDE
+.idea/
+.vscode/
+.run/
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Docker volumes
+volumes/*
+build/volumes/*
+
+# Configs
+cmd/config.yaml
+build/config.yaml
+
+# Vendoring
+vendor/

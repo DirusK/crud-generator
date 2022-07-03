@@ -11,7 +11,7 @@ import (
 const TagParser = "PARSER"
 
 // ExecuteTemplateFromString receives string template and executes it.
-func ExecuteTemplateFromString(tmpl string, data any) string {
+func ExecuteTemplateFromString(tmpl string, data interface{}) string {
 	parser, err := template.New("parser").Parse(tmpl)
 	if err != nil {
 		printer.Fatal(TagParser, err, "can't parse template from string")

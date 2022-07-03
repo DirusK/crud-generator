@@ -13,7 +13,7 @@ import (
 )
 
 // executeTemplate open template in <templatePath> and executes <data> structure in <resultPath> file.
-func (g Generator) executeTemplate(templatePath string, resultPath string, withGoImports bool, data any) error {
+func (g Generator) executeTemplate(templatePath string, resultPath string, withGoImports bool, data interface{}) error {
 	tmpl, err := readFile(templatePath)
 	if err != nil {
 		return err

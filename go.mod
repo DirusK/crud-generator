@@ -1,6 +1,6 @@
 module crud-generator
 
-go 1.18
+go 1.17
 
 require (
 	fyne.io/fyne/v2 v2.2.1
@@ -10,7 +10,7 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/pkg/errors v0.8.1
 )
- 
+
 require (
 	fyne.io/systray v1.10.0 // indirect
 	github.com/BurntSushi/toml v1.1.0 // indirect
