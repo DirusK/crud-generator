@@ -29,7 +29,7 @@ func (g Generator) GenerateDomain() error {
 
 func (g Generator) generateDomainModel(dirPath string) error {
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/domain.model.tpl",
+		"domain.model.tpl",
 		dirPath+g.Entity.GoFileSnakeWithExtension(),
 		true,
 		g.Entity,
@@ -39,7 +39,7 @@ func (g Generator) generateDomainModel(dirPath string) error {
 func (g Generator) generateDomainEnums(dirPath string) error {
 	for _, enum := range g.Entity.GetEnumFields() {
 		if err := g.executeTemplate(
-			"./internal/generators/vipcoin/templates/domain.enum.tpl",
+			"domain.enum.tpl",
 			dirPath+enum.GoFileSnakeWithExtension(),
 			true,
 			struct {
@@ -72,7 +72,7 @@ func (g Generator) generateDomainEnums(dirPath string) error {
 
 func (g Generator) generateFake(dirPath string) error {
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/domain.fake.tpl",
+		"domain.fake.tpl",
 		dirPath+"fake.go",
 		true,
 		g.Entity,

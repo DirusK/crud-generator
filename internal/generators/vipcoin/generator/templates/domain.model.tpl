@@ -1,4 +1,4 @@
-{{- /*gotype: crud-generator-gui/internal/generators/vipcoin/models.Entity*/ -}}
+{{- /*gotype: crud-generator/internal/generators/vipcoin/models.Entity*/ -}}
 {{ .Copyright }}
 
 package {{.PackageLower}}

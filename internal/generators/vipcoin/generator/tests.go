@@ -13,7 +13,7 @@ func (g Generator) GenerateIntegrationTests() error {
 	}
 
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/tests.integration.repository.tpl",
+		"tests.integration.repository.tpl",
 		dirPath+g.Entity.GoFileSnakeWithExtension(),
 		true,
 		g.Entity,

@@ -3,7 +3,6 @@ package generator
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,51 +11,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-// executeTemplate open template in <templatePath> and executes <data> structure in <resultPath> file.
-func (g Generator) executeTemplate(templatePath string, resultPath string, withGoImports bool, data interface{}) error {
-	tmpl, err := readFile(templatePath)
-	if err != nil {
-		return err
-	}
-
-	if _, err = g.Template.Parse(tmpl); err != nil {
-		return errors.Wrap(err, "can't parse template")
-	}
-
-	file, err := openFile(resultPath)
-	if err != nil {
-		return err
-	}
-
+// executeTemplate executes <data> structure in <resultPath> file.
+func (g Generator) executeTemplate(templateFile, resultPath string, withGoImports bool, data interface{}) error {
 	var sb strings.Builder
-
-	if err = g.Template.Execute(&sb, data); err != nil {
+	if err := g.Template.ExecuteTemplate(&sb, templateFile, data); err != nil {
 		return errors.Wrap(err, "can't execute template")
 	}
 
-	return writeToFile(file, sb.String(), withGoImports)
+	return writeToFile(resultPath, sb.String(), withGoImports)
 }
 
 func currentTimeForMigration() string {
 	return time.Now().Format("20060102150105")
-}
-
-func readFile(filepath string) (string, error) {
-	file, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		return "", errors.Wrap(err, "cannot read file")
-	}
-
-	return string(file), nil
-}
-
-func openFile(filepath string) (*os.File, error) {
-	var file, err = os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, os.ModePerm)
-	if err != nil {
-		return nil, errors.Wrap(err, "cannot open file")
-	}
-
-	return file, nil
 }
 
 func runGoImports(generatedCode string) (string, error) {
@@ -90,8 +56,11 @@ func runGoImports(generatedCode string) (string, error) {
 	return out.String(), err
 }
 
-func writeToFile(file *os.File, text string, withGoImports bool) error {
-	var err error
+func writeToFile(path string, text string, withGoImports bool) error {
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+	if err != nil {
+		return errors.Wrap(err, "cannot open file")
+	}
 
 	if withGoImports {
 		text, err = runGoImports(text)

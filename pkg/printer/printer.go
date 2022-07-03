@@ -26,7 +26,7 @@ func Info(tag, text string) {
 
 // Fatal logs error text in console and quit the program.
 func Fatal(tag string, err error, text ...string) {
-	info := strings.Join(append(text, err.Error()), ":")
+	info := strings.Join(append(text, err.Error()), ": ")
 
 	_, err = fmt.Fprintf(color.Output, "%s: %s \n", Yellow(strings.ToUpper(tag)), Red(info))
 	if err != nil {
@@ -38,7 +38,7 @@ func Fatal(tag string, err error, text ...string) {
 
 // Error logs error text in console.
 func Error(tag string, err error, text ...string) {
-	info := strings.Join(append(text, err.Error()), ":")
+	info := strings.Join(append(text, err.Error()), ": ")
 
 	_, err = fmt.Fprintf(color.Output, "%s: %s \n", Yellow(strings.ToUpper(tag)), Red(info))
 	if err != nil {

@@ -29,7 +29,7 @@ func (g Generator) GenerateHandler() error {
 
 func (g Generator) generateHandlerMethods(dirPath string) error {
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/handler.methods.tpl",
+		"handler.methods.tpl",
 		dirPath+g.Entity.GoFileSnakeWithExtension(),
 		true,
 		g.Entity,
@@ -38,7 +38,7 @@ func (g Generator) generateHandlerMethods(dirPath string) error {
 
 func (g Generator) generateHandlerRequestModels(dirPath string) error {
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/handler.request.tpl",
+		"handler.request.tpl",
 		dirPath+"request.go",
 		true,
 		g.Entity,
@@ -47,7 +47,7 @@ func (g Generator) generateHandlerRequestModels(dirPath string) error {
 
 func (g Generator) generateHandlerResponseModels(dirPath string) error {
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/handler.response.tpl",
+		"handler.response.tpl",
 		dirPath+"response.go",
 		true,
 		g.Entity,

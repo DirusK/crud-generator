@@ -25,7 +25,7 @@ func (g Generator) GenerateRepository() error {
 
 func (g Generator) generateRepositoryMethods(dirPath string) error {
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/repository.methods.tpl",
+		"repository.methods.tpl",
 		dirPath+g.Entity.GoFileSnakeWithExtension(),
 		true,
 		g.Entity,
@@ -34,7 +34,7 @@ func (g Generator) generateRepositoryMethods(dirPath string) error {
 
 func (g Generator) generateRepositoryModels(dirPath string) error {
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/repository.models.tpl",
+		"repository.models.tpl",
 		dirPath+"models.go",
 		true,
 		g.Entity,

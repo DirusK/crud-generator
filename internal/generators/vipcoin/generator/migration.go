@@ -14,7 +14,7 @@ func (g Generator) GenerateMigration() error {
 	}
 
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/migration.tpl",
+		"migration.tpl",
 		fmt.Sprintf("%s/%s-%s-table.sql", dirPath, currentTimeForMigration(), g.Entity.NamesKebab()),
 		false,
 		g.Entity,

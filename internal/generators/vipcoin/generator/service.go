@@ -22,7 +22,7 @@ func (g Generator) GenerateService() error {
 
 func (g Generator) generateServiceMethods(dirPath string) error {
 	return g.executeTemplate(
-		"./internal/generators/vipcoin/templates/service.methods.tpl",
+		"service.methods.tpl",
 		dirPath+g.Entity.GoFileSnakeWithExtension(),
 		true,
 		g.Entity,
