@@ -107,11 +107,3 @@ func writeToFile(file *os.File, text string, withGoImports bool) error {
 
 	return nil
 }
-
-// func prepareEntity(entity models.Entity, settings models.Settings) vipcoin.Entity {
-//
-// 	return vipcoin.Entity{
-// 		ModuleName: settings.ModuleName,
-// 		Entity:     models.Entity{},
-// 	}
-// }

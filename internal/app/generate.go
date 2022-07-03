@@ -30,12 +30,16 @@ type (
 
 	// fieldOptions contains widgets for configuring field.
 	fieldOptions struct {
-		nameEntry     *widget.Entry
-		enumEntry     *widget.Entry
-		defaultEntry  *widget.Entry
-		checkEntry    *widget.Entry
-		typeSelect    *widget.Select
-		nullableCheck *widget.Check
+		nameEntry       *widget.Entry
+		enumEntry       *widget.Entry
+		defaultEntry    *widget.Entry
+		checkEntry      *widget.Entry
+		validationEntry *widget.Entry
+		referencesEntry *widget.Entry
+		typeSelect      *widget.Select
+		omitemptyCheck  *widget.Check
+		nullableCheck   *widget.Check
+		uniqueCheck     *widget.Check
 	}
 )
 
@@ -67,6 +71,18 @@ func newFieldOption(app *App, selectedField *selectedField) fieldOptions {
 		app.entity.Fields[selectedField.ID].Check = check
 	}
 
+	validationEntry := widget.NewEntry()
+	validationEntry.PlaceHolder = "required"
+	validationEntry.OnChanged = func(validation string) {
+		app.entity.Fields[selectedField.ID].Validation = validation
+	}
+
+	referencesEntry := widget.NewEntry()
+	referencesEntry.PlaceHolder = "shops (id)"
+	referencesEntry.OnChanged = func(references string) {
+		app.entity.Fields[selectedField.ID].References = references
+	}
+
 	fieldTypeSelect := widget.NewSelect(models.TypesString, func(selected string) {
 		selectedType, ok := models.ToType(selected)
 		if !ok {
@@ -89,13 +105,25 @@ func newFieldOption(app *App, selectedField *selectedField) fieldOptions {
 		app.entity.Fields[selectedField.ID].Nullable = nullable
 	})
 
+	omitemptyCheck := widget.NewCheck("Omitempty", func(omitempty bool) {
+		app.entity.Fields[selectedField.ID].Omitempty = omitempty
+	})
+
+	uniqueCheck := widget.NewCheck("Unique", func(unique bool) {
+		app.entity.Fields[selectedField.ID].Unique = unique
+	})
+
 	return fieldOptions{
-		nameEntry:     nameEntry,
-		enumEntry:     enumEntry,
-		defaultEntry:  defaultEntry,
-		checkEntry:    checkEntry,
-		typeSelect:    fieldTypeSelect,
-		nullableCheck: nullableCheck,
+		nameEntry:       nameEntry,
+		enumEntry:       enumEntry,
+		defaultEntry:    defaultEntry,
+		checkEntry:      checkEntry,
+		validationEntry: validationEntry,
+		referencesEntry: referencesEntry,
+		typeSelect:      fieldTypeSelect,
+		omitemptyCheck:  omitemptyCheck,
+		nullableCheck:   nullableCheck,
+		uniqueCheck:     uniqueCheck,
 	}
 }
 
@@ -161,19 +189,14 @@ func newFieldsListContainer(
 			option.enumEntry.Disable()
 		}
 
-		if field.Default != "" {
-			option.defaultEntry.Text = field.Default
-		} else {
-			option.defaultEntry.Text = ""
-		}
-
-		if field.Check != "" {
-			option.checkEntry.Text = field.Check
-		} else {
-			option.checkEntry.Text = ""
-		}
+		option.defaultEntry.Text = field.Default
+		option.checkEntry.Text = field.Check
+		option.validationEntry.Text = field.Validation
+		option.referencesEntry.Text = field.References
 
 		option.nullableCheck.Checked = field.Nullable
+		option.omitemptyCheck.Checked = field.Omitempty
+		option.uniqueCheck.Checked = field.Unique
 
 		optionsContainer.Refresh()
 	}
@@ -257,6 +280,12 @@ func newEntityOptionsContainer(a *App) fyne.CanvasObject {
 		packageEntry.Refresh()
 	}
 
+	copyrightEntry := widget.NewEntry()
+	copyrightEntry.PlaceHolder = "Copyright (c)"
+	copyrightEntry.OnChanged = func(copyright string) {
+		a.entity.Copyright = copyright
+	}
+
 	paginationCheck := widget.NewCheck("With pagination", func(pagination bool) {
 		a.entity.WithPagination = pagination
 	})
@@ -269,6 +298,8 @@ func newEntityOptionsContainer(a *App) fyne.CanvasObject {
 		tableEntry,
 		newText("Package", 15, color.Black, true, false),
 		packageEntry,
+		newText("Copyright", 15, color.Black, true, false),
+		copyrightEntry,
 		newText("Options", 15, color.Black, true, false),
 		paginationCheck,
 	)
@@ -350,8 +381,12 @@ func newFieldOptionsContainer(option fieldOptions) fyne.Container {
 			option.defaultEntry,
 			newText("Check", 15, color.Black, true, false),
 			option.checkEntry,
+			newText("Validation", 15, color.Black, true, false),
+			option.validationEntry,
+			newText("References", 15, color.Black, true, false),
+			option.referencesEntry,
 			newText("Options", 15, color.Black, true, false),
-			option.nullableCheck,
+			container.NewVBox(option.nullableCheck, option.omitemptyCheck, option.uniqueCheck),
 		),
 	)
 }

@@ -43,6 +43,7 @@ func (g Generator) generateDomainEnums(dirPath string) error {
 			dirPath+enum.GoFileSnakeWithExtension(),
 			true,
 			struct {
+				Copyright      string
 				PackageLower   string
 				EnumCamel      string
 				EnumLowerCamel string
@@ -52,6 +53,7 @@ func (g Generator) generateDomainEnums(dirPath string) error {
 				EnumMap        string
 				Reference      string
 			}{
+				Copyright:      g.Entity.Copyright,
 				PackageLower:   g.Entity.PackageLower(),
 				EnumCamel:      enum.NameCamel(true),
 				EnumLowerCamel: enum.NameLowerCamel(true),

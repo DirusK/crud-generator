@@ -13,6 +13,7 @@ import (
 type migrateStatement struct {
 	Up   string
 	Down string
+	Used bool
 }
 
 // newMigrateStatement returns a new migration statement.
@@ -61,7 +62,7 @@ func migrationDatabaseType(field Field, tableName string) string {
 func (e Entity) MigrationCreateExtensions() string {
 	var result []string
 
-	for _, fieldType := range e.MigrationExtensions {
+	for fieldType := range e.MigrationExtensions {
 		result = append(result, extensions[fieldType].Up)
 	}
 
@@ -71,7 +72,7 @@ func (e Entity) MigrationCreateExtensions() string {
 func (e Entity) MigrationDropExtensions() string {
 	var result []string
 
-	for _, fieldType := range e.MigrationExtensions {
+	for fieldType := range e.MigrationExtensions {
 		result = append(result, extensions[fieldType].Down)
 	}
 
@@ -154,6 +155,26 @@ func (e Entity) MigrationTableFields() string {
 		return fmt.Sprintf("check(%s)", field.Check)
 	}
 
+	prepareUnique := func(field Field) string {
+		if field.Unique {
+			return "unique"
+		}
+
+		return ""
+	}
+
+	prepareReferences := func(field Field) string {
+		if field.References != "" {
+			return fmt.Sprintf("references %s", field.References)
+		}
+
+		return ""
+	}
+
+	mergeOptions := func(str ...string) string {
+		return strings.Join(str, " ") + ","
+	}
+
 	var result []string
 	for idx, field := range e.Fields {
 		if idx == 0 {
@@ -167,13 +188,17 @@ func (e Entity) MigrationTableFields() string {
 			continue
 		}
 
-		result = append(result, fmt.Sprintf(
-			"%s %s %s,",
-			field.NameSnake(),
-			migrationDatabaseType(field, e.TableName()),
-			prepareDefault(field)+" "+prepareNull(field)+" "+prepareCheck(field),
-		))
+		result = append(result,
+			mergeOptions(
+				field.NameSnake(),
+				migrationDatabaseType(field, e.TableName()),
+				prepareDefault(field),
+				prepareCheck(field),
+				prepareUnique(field),
+				prepareReferences(field),
+				prepareNull(field),
+			))
 	}
 
-	return strings.Join(result, "\n")
+	return strings.Join(result, "\n\t")
 }

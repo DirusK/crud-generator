@@ -1,4 +1,6 @@
 {{- /*gotype: crud-generator-gui/internal/generators/vipcoin/models.Entity*/ -}}
+{{ .Copyright }}
+
 package {{.PackageLower}}
 
 import (
@@ -13,6 +15,20 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 )
+
+/*
+
+a.{{.NamesLowerCamel}}HTTPHandler = {{.PackageLower}}.NewHandler(a.{{.NamesServiceLowerCamel}})
+
+// routes for {{.NamesLowerCamel}}
+{{.NamesLowerCamel}} := router.Group("/{{.NamesSnake}}")
+{{.NamesLowerCamel}}.Post("/", a.{{.NamesLowerCamel}}HTTPHandler.Create)
+{{.NamesLowerCamel}}.Get("/:{{.FieldIDSnake}}", a.{{.NamesLowerCamel}}HTTPHandler.Get)
+{{.NamesLowerCamel}}.Get("/", a.{{.NamesLowerCamel}}HTTPHandler.GetAll)
+{{.NamesLowerCamel}}.Put("/:{{.FieldIDSnake}}", a.{{.NamesLowerCamel}}HTTPHandler.Update)
+{{.NamesLowerCamel}}.Delete("/:{{.FieldIDSnake}}", a.{{.NamesLowerCamel}}HTTPHandler.Delete)
+
+*/
 
 //go:generate ifacemaker -f {{.GoFileSnakeWithExtension}} -s Handler -p delivery -i {{.Interface}}HTTP -y "{{.Interface}}HTTP - describe an interface for working with {{.NamesLowerCamel}} over HTTP."
 
@@ -52,16 +68,13 @@ func (h Handler) Get(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-{{ else }}
-	id, err := h.GetCustomParameterID(ctx, parameter{{.FieldIDCamel}})
+{{ else }} id, err := h.GetCustomParameterID(ctx, parameter{{.FieldIDCamel}})
 	if err != nil {
 		return err
 	}
 {{ end }}
 
-	result, err := h.{{.NamesServiceLowerCamel}}.Get(
-		ctx.Context(),
-		filter.NewFilter().SetArgument({{.PackageLower}}.Field{{.FieldIDCamel}}, id))
+	result, err := h.{{.NamesServiceLowerCamel}}.Get(ctx.Context(), filter.NewFilter().SetArgument({{.PackageLower}}.Field{{.FieldIDCamel}}, id))
 	if err != nil {
 		return err
 	}
@@ -127,8 +140,7 @@ func (h Handler) Delete(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	{{ else }}
-	id, err := h.GetCustomParameterID(ctx, parameter{{.FieldIDCamel}})
+{{ else }} id, err := h.GetCustomParameterID(ctx, parameter{{.FieldIDCamel}})
 	if err != nil {
 		return err
 	}

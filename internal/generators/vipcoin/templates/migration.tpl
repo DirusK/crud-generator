@@ -1,4 +1,6 @@
 {{- /*gotype: crud-generator-gui/internal/generators/vipcoin/models.Entity*/ -}}
+{{ .Copyright }}
+
 -- +migrate Up
 
 {{.MigrationCreateExtensions}}

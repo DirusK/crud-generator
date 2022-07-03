@@ -36,7 +36,12 @@ func (e Entity) ResponseModel() string {
 	var result []string
 
 	for _, field := range e.Fields {
-		tag := fmt.Sprintf(`json:"%s"`, field.NameSnake())
+		json := field.NameSnake()
+		if field.Omitempty {
+			json += ",omitempty"
+		}
+
+		tag := fmt.Sprintf(`json:"%s"`, json)
 
 		var fieldType string
 		if field.Type == models.TypeEnum {
@@ -56,10 +61,13 @@ func (e Entity) RequestModel() string {
 
 	for idx, field := range e.Fields {
 		var tag string
-		if idx == 0 {
+		if idx == 0 { // ID field
 			tag = `json:"-"`
 		} else {
-			tag = fmt.Sprintf(`json:"%s" valid:"required"`, field.NameSnake())
+			tag = fmt.Sprintf(`json:"%s"`, field.NameSnake())
+			if field.Validation != "" {
+				tag += fmt.Sprintf(` valid:"%s"`, field.Validation)
+			}
 		}
 
 		var fieldType string

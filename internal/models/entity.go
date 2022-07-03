@@ -10,6 +10,7 @@ type (
 	// Entity describes entity to be generated.
 	Entity struct {
 		Name           string
+		Copyright      string
 		Package        string
 		Table          string
 		WithPagination bool

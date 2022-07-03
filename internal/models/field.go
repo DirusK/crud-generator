@@ -15,7 +15,11 @@ type (
 		EnumValues []string
 		Default    string
 		Check      string
+		Validation string
+		References string
 		Nullable   bool
+		Omitempty  bool
+		Unique     bool
 	}
 )
 

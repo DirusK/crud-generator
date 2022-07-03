@@ -22,6 +22,7 @@ func NewGenerator(entity models.Entity, settings models.Settings) generators.Gen
 		Settings: settings,
 		Entity: vipcoin.NewEntity(
 			settings.ModuleName,
+			entity.Copyright,
 			entity.Name,
 			entity.Package,
 			entity.Table,

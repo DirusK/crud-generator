@@ -12,6 +12,7 @@ type (
 	// Entity for VipCoin generator.
 	Entity struct {
 		ModuleName          string
+		Copyright           string
 		Name                string
 		Package             string
 		Table               string
@@ -20,20 +21,20 @@ type (
 		Fields              []Field
 	}
 
-	migrationExtensions []domain.Type
+	migrationExtensions map[domain.Type]struct{}
 )
 
 // NewEntity constructor.
-func NewEntity(moduleName, name, packageName, tableName string, withPagination bool, fields []domain.Field) Entity {
+func NewEntity(moduleName, copyright, name, packageName, tableName string, withPagination bool, fields []domain.Field) Entity {
 	var (
 		preparedFields []Field
-		extensions     migrationExtensions
+		extensions     = make(migrationExtensions)
 	)
 
 	for _, field := range fields {
 		switch field.Type {
 		case domain.TypeUUID:
-			extensions = append(extensions, field.Type)
+			extensions[domain.TypeUUID] = struct{}{}
 		}
 
 		preparedFields = append(preparedFields, NewField(field))
@@ -41,6 +42,7 @@ func NewEntity(moduleName, name, packageName, tableName string, withPagination b
 
 	return Entity{
 		ModuleName:          moduleName,
+		Copyright:           toCopyright(copyright),
 		Name:                name,
 		Package:             packageName,
 		Table:               tableName,
