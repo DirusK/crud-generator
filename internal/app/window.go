@@ -20,7 +20,7 @@ func (a *App) mainWindow() fyne.Window {
 	a.window = fyneApplication.NewWindow(a.meta.AppName)
 	a.window.SetContent(tabs)
 	a.window.CenterOnScreen()
-	a.window.Resize(fyne.NewSize(900, 600))
+	a.window.Resize(fyne.NewSize(900, 700))
 	a.window.SetIcon(newResource("go_icon.png"))
 
 	return a.window

@@ -27,6 +27,8 @@ func currentTimeForMigration() string {
 
 func runGoImports(generatedCode string) (string, error) {
 	formatterCmd := exec.Command("goimports")
+	// formatterCmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true} // TODO: required for Windows
+
 	stdinPipe, _ := formatterCmd.StdinPipe()
 
 	var out, errout bytes.Buffer

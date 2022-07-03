@@ -23,3 +23,6 @@ build-linux:
 
 build-darwin:
 	fyne-cross darwin -app-id $(APP_NAME).$(VERSION) -output $(APP_NAME) ./cmd
+
+build-windows-local:
+	go build -ldflags -H=windowsgui -o ./build/$(APP_NAME).exe ./cmd/
