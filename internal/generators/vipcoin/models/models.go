@@ -27,6 +27,8 @@ func dbNullType(fieldType models.Type) string {
 		return "sql.NullFloat64"
 	case models.TypeUUID:
 		return "uuid.NullUUID"
+	case models.TypeCoins:
+		return "coins.NullCoins"
 	default:
 		return ""
 	}

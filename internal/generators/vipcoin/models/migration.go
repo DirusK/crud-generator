@@ -49,9 +49,9 @@ func migrationDatabaseType(field Field, tableName string) string {
 	case models.TypeTime:
 		return "timestamp"
 	case models.TypeDecimal, models.TypeCoins:
-		return "numeric(32,16)"
+		return "numeric"
 	case models.TypeFloat64, models.TypeFloat32:
-		return "numeric(32,16)"
+		return "numeric"
 	case models.TypeUUID:
 		return "uuid"
 	default:

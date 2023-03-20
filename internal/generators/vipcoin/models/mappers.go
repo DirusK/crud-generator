@@ -22,7 +22,7 @@ func toNullConverter(fieldType models.Type) string {
 	case models.TypeByte:
 		return `repository.ToNullByte(%s)`
 	case models.TypeDecimal:
-		return `decimal.NewNullDecimal(%s)`
+		return `repository.ToNullDecimal(%s)`
 	case models.TypeInt, models.TypeInt8, models.TypeInt16, models.TypeInt32:
 		return `repository.ToNullInt64(int64(%s))`
 	case models.TypeFloat64:
@@ -33,6 +33,8 @@ func toNullConverter(fieldType models.Type) string {
 		return `repository.ToNullInt64(int64(%s))`
 	case models.TypeEnum:
 		return `repository.ToNullString(%s.String())`
+	case models.TypeCoins:
+		return `coins.ToNullCoins(%s)`
 	default:
 		return ""
 	}
@@ -66,6 +68,8 @@ func fromNullConverter(field Field, packageLower string) string {
 		return `float32(%s.Float64)`
 	case models.TypeDecimal:
 		return `%s.Decimal`
+	case models.TypeCoins:
+		return `%s.Coins`
 	case models.TypeUint:
 		return `uint(%s.Int64)`
 	case models.TypeUint8:

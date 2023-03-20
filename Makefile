@@ -11,6 +11,7 @@ UNAME := $(shell uname)
 
 default:
 	# Run "build" to build the application for current OS.
+	# Run "build-all" to build the application for all OS.
 	# Run "build-windows" to build the application for windows.
 	# Run "build-linux" to build the application for linux.
 	# Run "build-darwin" to build the application for darwin.
@@ -36,4 +37,4 @@ build-linux:
 	fyne-cross linux -output $(APP_NAME) ./cmd
 
 build-darwin:
-	fyne-cross darwin -app-id $(APP_NAME).$(VERSION) -output $(APP_NAME) ./cmd
+	fyne-cross darwin -app-id $(APP_NAME).$(VERSION) -output $(APP_NAME).app ./cmd
