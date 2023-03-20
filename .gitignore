@@ -1,11 +1,12 @@
 # Fyne cross compilation
 fyne-cross/
-buid/
+build/
 
 # IDE
 .idea/
 .vscode/
 .run/
+.DS_Store
 
 # Test binary, build with `go test -c`
 *.test
@@ -14,8 +15,8 @@ buid/
 *.out
 
 # Docker volumes
-volumes/*
-build/volumes/*
+volumes/
+build/volumes/
 
 # Configs
 cmd/config.yaml
