@@ -13,6 +13,9 @@ default:
 	# Run "build-linux" to build the application for linux.
 	# Run "build-darwin" to build the application for darwin.
 
+build:
+	go build -o ./build/$(APP_NAME) ./cmd/
+
 build-all: build-windows build-linux build-darwin
 
 build-windows:

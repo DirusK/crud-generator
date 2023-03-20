@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"git.ooo.ua/vipcoin/lib/filter"
-	"github.com/olekukonko/tablewriter"
 	"github.com/stretchr/testify/assert"
 
 	"{{.ModuleNameLower}}/_tests/integration/repository"
@@ -29,7 +28,7 @@ func TestRepository_Create(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "[success] create {{.NameLowerCamel}}",
+			name: "[success] create {{.NameLowerSpace}}",
 			args: args{
 				ctx: context.Background(),
 				entity: domain.Fake{{.NameCamel}}(),
@@ -65,7 +64,7 @@ func TestRepository_Get(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "[success] get one {{.NameLowerCamel}}",
+			name: "[success] get one {{.NameLowerSpace}}",
 			args: args{
 				ctx:    context.Background(),
 				filter: filter.NewFilter(),
@@ -83,11 +82,7 @@ func TestRepository_Get(t *testing.T) {
 
 			if !tt.wantErr {
 				if assert.NotEmpty(t, got) {
-					table := tablewriter.NewWriter(os.Stdout)
-					table.SetHeader([]string{"{{.NameCamel}}"})
-					table.SetRowLine(true)
-					table.Append([]string{fmt.Sprintf("%+v", got)})
-					table.Render()
+					t.Logf("got {{.NameLowerCamel}}: %+v", got)
 				}
 			}
 		})
@@ -105,7 +100,7 @@ func TestRepository_GetAll(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "[success] get all {{.NamesLowerCamel}}",
+			name: "[success] get all {{.NamesLowerSpace}}",
 			args: args{
 				ctx:    context.Background(),
 				filter: filter.NewFilter().SetLimit(2),
@@ -123,24 +118,15 @@ func TestRepository_GetAll(t *testing.T) {
 
 			if !tt.wantErr {
 				if assert.NotEmpty(t, got) {
-					table := tablewriter.NewWriter(os.Stdout)
-					table.SetHeader([]string{"Index", "{{.NamesCamel}}"})
-					table.SetRowLine(true)
-
 					{{ if .WithPaginationCheck }}
-
 					for idx, {{.NameLowerCamel}} := range got.{{.NamesCamel}} {
-						table.Append([]string{strconv.Itoa(idx), fmt.Sprintf("%+v", {{.NameLowerCamel}})})
+						t.Logf("index: %d, {{.NameLowerCamel}}: %+v", idx, {{.NameLowerCamel}})
 					}
-
 					{{ else }}
-
 					for idx, {{.NameLowerCamel}} := range got {
-						table.Append([]string{strconv.Itoa(idx), fmt.Sprintf("%+v", {{.NameLowerCamel}})})
+						t.Logf("index: %d, {{.NameLowerCamel}}: %+v", idx, {{.NameLowerCamel}})
 					}
-
 					{{ end }}
-					table.Render()
 				}
 			}
 		})
@@ -158,7 +144,7 @@ func TestRepository_Delete(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "[success] delete {{.NameLowerCamel}}",
+			name: "[success] delete {{.NameLowerSpace}}",
 			args: args{
 				ctx: context.Background(),
 				{{.FieldIDCamel}}:  {{ if eq `uuid.UUID` .FieldIDType}} uuid.MustParse("set your uuid here") {{ else }} 1 {{end}}, // TODO: Replace ID value.
@@ -188,7 +174,7 @@ func TestRepository_Update(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "[success] update {{.NamesLowerCamel}}}",
+			name: "[success] update {{.NamesLowerSpace}}}",
 			args: args{
 				ctx: context.Background(),
 				{{.NamesLowerCamel}}: []domain.{{.NameCamel}}{ // TODO: Replace with your data.

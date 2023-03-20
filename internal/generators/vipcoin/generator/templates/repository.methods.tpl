@@ -9,6 +9,8 @@ import (
 	"errors"
 	"time"
 
+    "git.ooo.ua/vipcoin/lib/log"
+    "git.ooo.ua/vipcoin/lib/errs"
 	"git.ooo.ua/vipcoin/lib/filter"
 
 	"{{.ModuleName}}/internal/api/domain/{{.PackageLower}}"
@@ -21,22 +23,23 @@ var _ repository.{{.Interface}} = &Repository{}
 
 // Repository implements repository.{{.Interface}}
 type Repository struct {
-	queryTimeout time.Duration
-	db           repository.DatabaseExecutor
+	db           database.Executor
+	logger       log.Logger
 }
 
 // NewRepository constructor.
-func NewRepository(qt time.Duration, db repository.DatabaseExecutor) *Repository {
+func NewRepository(db database.Executor, logger log.Logger) *Repository {
 	return &Repository{
-		queryTimeout: qt,
 		db:           db,
+		logger:       logger.With("{{.NamesLowerSpace}} repository"),
 	}
 }
 
 // Create new {{.NameLowerCamel}} in database.
 func (r Repository) Create(ctx context.Context, entity {{.PackageDomainName}}) ({{.PackageDomainName}}, error) {
-	ctx, cancel := context.WithTimeout(ctx, r.queryTimeout)
-	defer cancel()
+	logger := r.logger.StartTrace(ctx, "create")
+	ctx = logger.Context()
+	defer logger.FinishTrace()
 
 	query := `
 		INSERT INTO {{.TableName}} (
@@ -51,7 +54,7 @@ func (r Repository) Create(ctx context.Context, entity {{.PackageDomainName}}) (
 
 	stmt, err := r.db.PrepareNamedContext(ctx, query)
 	if err != nil {
-		return {{.PackageDomainName}}{}, repository.ErrExecute{Cause: err.Error()}
+		return {{.PackageDomainName}}{}, errs.Internal{Cause: err.Error()}
 	}
 
 	defer func() {
@@ -59,8 +62,8 @@ func (r Repository) Create(ctx context.Context, entity {{.PackageDomainName}}) (
 	}()
 
 	var result {{.NameLowerCamel}}
-	if err = stmt.GetContext(ctx, &result, toDatabase(entity)); err != nil {
-		return {{.PackageDomainName}}{}, repository.ErrExecute{Cause: err.Error()}
+	if err = r.db.NewStatement(stmt).GetContext(ctx, &result, toDatabase(entity)); err != nil {
+		return {{.PackageDomainName}}{}, errs.Internal{Cause: err.Error()}
 	}
 
 	return result.toDomain(), nil
@@ -68,8 +71,9 @@ func (r Repository) Create(ctx context.Context, entity {{.PackageDomainName}}) (
 
 // Get one {{.NameLowerCamel}} from database by filter.
 func (r Repository) Get(ctx context.Context, filter filter.Filter) ({{.PackageDomainName}}, error) {
-	ctx, cancel := context.WithTimeout(ctx, r.queryTimeout)
-	defer cancel()
+	logger := r.logger.StartTrace(ctx, "get")
+	ctx = logger.Context()
+	defer logger.FinishTrace()
 
 	query, args := filter.SetLimit(1).Build(tableName)
 
@@ -77,10 +81,10 @@ func (r Repository) Get(ctx context.Context, filter filter.Filter) ({{.PackageDo
 
 	if err := r.db.GetContext(ctx, &result, query, args...); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return {{.PackageDomainName}}{}, repository.ErrNotFound{What: "{{.NameLowerCamel}}"}
+			return {{.PackageDomainName}}{}, errs.NotFound{What: "{{.NameSnake}}"}
 		}
 
-		return {{.PackageDomainName}}{}, repository.ErrExecute{Cause: err.Error()}
+		return {{.PackageDomainName}}{}, errs.Internal{Cause: err.Error()}
 	}
 
 	return result.toDomain(), nil
@@ -90,8 +94,9 @@ func (r Repository) Get(ctx context.Context, filter filter.Filter) ({{.PackageDo
 
 // GetAll {{.NamesLowerCamel}} from database by filter.
 func (r Repository) GetAll(ctx context.Context, filter filter.Filter) ({{.PackageDomainNameList}}, error) {
-	ctx, cancel := context.WithTimeout(ctx, r.queryTimeout)
-	defer cancel()
+	logger := r.logger.StartTrace(ctx, "get all")
+	ctx = logger.Context()
+	defer logger.FinishTrace()
 
 	query, args := filter.
 		SetLimit(0).
@@ -101,18 +106,18 @@ func (r Repository) GetAll(ctx context.Context, filter filter.Filter) ({{.Packag
 
 	var total uint64
 	if err := r.db.GetContext(ctx, &total, query, args...); err != nil {
-		return {{.PackageDomainNameList}}{}, repository.ErrExecute{Cause: err.Error()}
+		return {{.PackageDomainNameList}}{}, errs.Internal{Cause: err.Error()}
 	}
 
 	if total == 0 {
-		return {{.PackageDomainNameList}}{}, repository.ErrNotFound{What: "{{.NamesLowerCamel}}"}
+		return {{.PackageDomainNameList}}{}, errs.NotFound{What: "{{.NamesSnake}}"}
 	}
 
 	query, args = filter.Build(tableName)
 
 	var result {{.ListLowerCamel}}
 	if err := r.db.SelectContext(ctx, &result, query, args...); err != nil {
-		return {{.PackageDomainNameList}}{}, repository.ErrExecute{Cause: err.Error()}
+		return {{.PackageDomainNameList}}{}, errs.Internal{Cause: err.Error()}
 	}
 
 	return result.toDomain(total), nil
@@ -122,18 +127,19 @@ func (r Repository) GetAll(ctx context.Context, filter filter.Filter) ({{.Packag
 
 // GetAll {{.NamesLowerCamel}} from database by filter.
 func (r Repository) GetAll(ctx context.Context, filter filter.Filter) ({{ .PackageDomainNames }}, error) {
-	ctx, cancel := context.WithTimeout(ctx, r.queryTimeout)
-	defer cancel()
+	logger := r.logger.StartTrace(ctx, "get all")
+	ctx = logger.Context()
+	defer logger.FinishTrace()
 
 	query, args := filter.Build(tableName)
 
 	var result {{.ListLowerCamel}}
 	if err := r.db.SelectContext(ctx, &result, query, args...); err != nil {
-		return {{ .PackageDomainNames }}{}, repository.ErrExecute{Cause: err.Error()}
+		return {{ .PackageDomainNames }}{}, errs.Internal{Cause: err.Error()}
 	}
 
 	if len(result) == 0 {
-		return {{ .PackageDomainNames }}{}, repository.ErrNotFound{What: "{{.NamesLowerCamel}}"}
+		return {{ .PackageDomainNames }}{}, errs.NotFound{What: "{{.NamesSnake}}"}
 	}
 
 	return result.toDomain(), nil
@@ -143,8 +149,9 @@ func (r Repository) GetAll(ctx context.Context, filter filter.Filter) ({{ .Packa
 
 // Update {{.NameLowerCamel}} in database.
 func (r Repository) Update(ctx context.Context, {{.NamesLowerCamel}} ...{{.PackageDomainName}}) error {
-	ctx, cancel := context.WithTimeout(ctx, r.queryTimeout)
-	defer cancel()
+	logger := r.logger.StartTrace(ctx, "update")
+	ctx = logger.Context()
+	defer logger.FinishTrace()
 
 	query := `
 		UPDATE {{.TableName}} SET
@@ -154,27 +161,30 @@ func (r Repository) Update(ctx context.Context, {{.NamesLowerCamel}} ...{{.Packa
 
 	stmt, err := r.db.PrepareNamedContext(ctx, query)
 	if err != nil {
-		return repository.ErrExecute{Cause: err.Error()}
+		return errs.Internal{Cause: err.Error()}
 	}
 
+    wrappedStmt := r.db.NewStatement(stmt)
+
 	for idx := range {{.NamesLowerCamel}} {
-		if _, err = stmt.ExecContext(ctx, toDatabase({{.NamesLowerCamel}}[idx])); err != nil {
-			return repository.ErrExecute{Cause: err.Error()}
+		if _, err = wrappedStmt.ExecContext(ctx, toDatabase({{.NamesLowerCamel}}[idx])); err != nil {
+			return errs.Internal{Cause: err.Error()}
 		}
 	}
 
 	return nil
 }
 
-// Delete {{.NameLowerCamel}} in database.
+// Delete {{.NameLowerSpace}} in database.
 func (r Repository) Delete(ctx context.Context, {{.FieldIDCamel}} {{.FieldIDType}}) error {
-	ctx, cancel := context.WithTimeout(ctx, r.queryTimeout)
-	defer cancel()
+	logger := r.logger.StartTrace(ctx, "delete")
+	ctx = logger.Context()
+	defer logger.FinishTrace()
 
 	query := ` DELETE FROM {{.TableName}} WHERE {{.FieldIDSnake}} = $1 `
 
 	if _, err := r.db.ExecContext(ctx, query, ID); err != nil {
-		return repository.ErrExecute{Cause: err.Error()}
+		return errs.Internal{Cause: err.Error()}
 	}
 
 	return nil

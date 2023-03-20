@@ -14,7 +14,7 @@ func (g Generator) GenerateIntegrationTests() error {
 
 	return g.executeTemplate(
 		"tests.integration.repository.tpl",
-		dirPath+g.Entity.GoFileSnakeWithExtension(),
+		dirPath+g.Entity.GoFileSnakeWithoutExtension()+"_test.go",
 		true,
 		g.Entity,
 	)

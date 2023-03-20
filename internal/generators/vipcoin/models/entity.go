@@ -100,6 +100,22 @@ func (e Entity) NamesSnake() string {
 	return strcase.ToSnake(e.Name) + "s"
 }
 
+func (e Entity) NamesSpace() string {
+	return strcase.ToDelimited(e.Name+"s", ' ')
+}
+
+func (e Entity) NameSpace() string {
+	return strcase.ToDelimited(e.Name, ' ')
+}
+
+func (e Entity) NamesLowerSpace() string {
+	return strings.ToLower(strcase.ToDelimited(e.Name+"s", ' '))
+}
+
+func (e Entity) NameLowerSpace() string {
+	return strings.ToLower(strcase.ToDelimited(e.Name, ' '))
+}
+
 func (e Entity) ListCamel() string {
 	return strcase.ToCamel(e.Name + "List")
 }

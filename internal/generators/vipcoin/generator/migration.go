@@ -15,7 +15,7 @@ func (g Generator) GenerateMigration() error {
 
 	return g.executeTemplate(
 		"migration.tpl",
-		fmt.Sprintf("%s/%s-%s-table.sql", dirPath, currentTimeForMigration(), g.Entity.NamesKebab()),
+		fmt.Sprintf("%s/%s-%s.sql", dirPath, currentTimeForMigration(), g.Entity.TableName()),
 		false,
 		g.Entity,
 	)

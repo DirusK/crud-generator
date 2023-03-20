@@ -9,9 +9,11 @@ import (
 	"{{.ModuleNameLower}}/internal/api/domain/{{.PackageLower}}"
 	"{{.ModuleNameLower}}/internal/api/services"
 
+    "git.ooo.ua/vipcoin/lib/log"
 	"git.ooo.ua/vipcoin/lib/filter"
 	"git.ooo.ua/vipcoin/lib/http/query"
 	"git.ooo.ua/vipcoin/lib/http/responder"
+    "git.ooo.ua/vipcoin/lib/tracing/sentry"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -38,23 +40,28 @@ var _ delivery.{{.Interface}}HTTP = &Handler{}
 type Handler struct {
 	responder.Responder
 	{{.NamesServiceLowerCamel}} services.{{.Interface}}
+	logger                      log.Logger
 }
 
 // NewHandler - constructor.
 func NewHandler({{.NamesServiceLowerCamel}} services.{{.Interface}}) *Handler {
 	return &Handler{
 		{{.NamesServiceLowerCamel}}: {{.NamesServiceLowerCamel}},
+		logger:                      logger.With("{{.NamesLowerSpace}} handler"),
 	}
 }
 
-// Create - define http handler method for creating {{.NameLowerCamel}}.
+// Create - define http handler method for creating {{.NameLowerSpace}}.
 func (h Handler) Create(ctx *fiber.Ctx) error {
+	logger := h.logger.StartTrace(ctx.UserContext(), "create", sentry.TraceFromFiberContext(ctx))
+	defer logger.FinishTrace()
+
 	request, err := h.{{.NameLowerCamelRequest}}FromContext(ctx)
 	if err != nil {
 		return err
 	}
 
-	{{.NameLowerCamel}}, err := h.{{.NamesServiceLowerCamel}}.Create(ctx.Context(), request.toDomain())
+	{{.NameLowerCamel}}, err := h.{{.NamesServiceLowerCamel}}.Create(logger.Context(), request.toDomain())
 	if err != nil {
 		return err
 	}
@@ -62,8 +69,11 @@ func (h Handler) Create(ctx *fiber.Ctx) error {
 	return h.Respond(ctx, fiber.StatusCreated, toResponse({{.NameLowerCamel}}))
 }
 
-// Get - define http handler method which responds with one {{.NameLowerCamel}} by specified id.
+// Get - define http handler method which responds with one {{.NameLowerSpace}} by specified id.
 func (h Handler) Get(ctx *fiber.Ctx) error {
+	logger := h.logger.StartTrace(ctx.UserContext(), "get", sentry.TraceFromFiberContext(ctx))
+	defer logger.FinishTrace()
+
 {{ if eq `uuid.UUID` .FieldIDType}} id, err := http.GetUUID(ctx, parameter{{.FieldIDCamel}})
 	if err != nil {
 		return err
@@ -74,7 +84,7 @@ func (h Handler) Get(ctx *fiber.Ctx) error {
 	}
 {{ end }}
 
-	result, err := h.{{.NamesServiceLowerCamel}}.Get(ctx.Context(), filter.NewFilter().SetArgument({{.PackageLower}}.Field{{.FieldIDCamel}}, id))
+	result, err := h.{{.NamesServiceLowerCamel}}.Get(logger.Context(), filter.NewFilter().SetArgument({{.PackageLower}}.Field{{.FieldIDCamel}}, id))
 	if err != nil {
 		return err
 	}
@@ -82,8 +92,11 @@ func (h Handler) Get(ctx *fiber.Ctx) error {
 	return h.Respond(ctx, fiber.StatusOK, toResponse(result))
 }
 
-// GetAll - define http handler method which responds with all {{.NamesLowerCamel}}.
+// GetAll - define http handler method which responds with all {{.NamesLowerSpace}}.
 func (h Handler) GetAll(ctx *fiber.Ctx) error {
+	logger := h.logger.StartTrace(ctx.UserContext(), "get all", sentry.TraceFromFiberContext(ctx))
+	defer logger.FinishTrace()
+
 	request := query.NewRequest(ctx, query.WithDefaultCondition(filter.ConditionAND))
 	if err := request.SetArgumentsFromStruct(&getAllFilter{}); err != nil {
 		return errs.BadRequest{Cause: "invalid filter parameters"}
@@ -98,7 +111,7 @@ func (h Handler) GetAll(ctx *fiber.Ctx) error {
 		return err
 	}
 	{{ end }}
-	result, err := h.{{.NamesServiceLowerCamel}}.GetAll(ctx.Context(), request.ToFilter())
+	result, err := h.{{.NamesServiceLowerCamel}}.GetAll(logger.Context(), request.ToFilter())
 	if err != nil {
 		return err
 	}
@@ -106,8 +119,11 @@ func (h Handler) GetAll(ctx *fiber.Ctx) error {
 	return h.Respond(ctx, fiber.StatusOK, toResponseList(result{{if .WithPaginationCheck}},request.Pagination {{ end }}))
 }
 
-// Update - define http handler method for updating {{.NameLowerCamel}}.
+// Update - define http handler method for updating {{.NameLowerSpace}}.
 func (h Handler) Update(ctx *fiber.Ctx) error {
+	logger := h.logger.StartTrace(ctx.UserContext(), "update", sentry.TraceFromFiberContext(ctx))
+	defer logger.FinishTrace()
+
 	request, err := h.{{.NameLowerCamelRequest}}FromContext(ctx)
 	if err != nil {
 		return err
@@ -127,15 +143,18 @@ func (h Handler) Update(ctx *fiber.Ctx) error {
 
 	request.{{.FieldIDCamel}} = {{ if eq `uint64` .FieldIDType }} id {{ else if eq `uuid.UUID` .FieldIDType }} id  {{ else }}{{.FieldIDType}}(id) {{ end }}
 
-	if err = h.{{.NamesServiceLowerCamel}}.Update(ctx.Context(), request.toDomain()); err != nil {
+	if err = h.{{.NamesServiceLowerCamel}}.Update(logger.Context(), request.toDomain()); err != nil {
 		return err
 	}
 
 	return h.RespondEmpty(ctx, fiber.StatusOK)
 }
 
-// Delete - define http handler method which deletes {{.NameLowerCamel}} by specified id.
+// Delete - define http handler method which deletes {{.NameLowerSpace}} by specified id.
 func (h Handler) Delete(ctx *fiber.Ctx) error {
+	logger := h.logger.StartTrace(ctx.UserContext(), "delete", sentry.TraceFromFiberContext(ctx))
+	defer logger.FinishTrace()
+
 {{ if eq `uuid.UUID` .FieldIDType}}		id, err := http.GetUUID(ctx, parameter{{.FieldIDCamel}})
 	if err != nil {
 		return err
@@ -146,7 +165,7 @@ func (h Handler) Delete(ctx *fiber.Ctx) error {
 	}
 	{{ end }}
 
-	if err = h.{{.NamesServiceLowerCamel}}.Delete(ctx.Context(), id); err != nil {
+	if err = h.{{.NamesServiceLowerCamel}}.Delete(logger.Context(), id); err != nil {
 		return err
 	}
 
